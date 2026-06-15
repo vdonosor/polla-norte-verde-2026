@@ -890,21 +890,19 @@ async function handlePin() {
       return;
     }
 
-    // Usuario nuevo: signUp con profile_id en metadata, confirm email, sign in.
-    const { data: su, error: e1 } = await sb.auth.signUp({
-      email, password,
-      options: { data: { profile_id: selectedProfile.id } }
-    });
-    if (e1 && !/already|registered|exists/i.test(e1.message || '')) {
-      showPinError(e1.message || 'Error al crear cuenta.');
+    // Usuario nuevo: crear cuenta directo en BD (evita problemas con signUp/SMTP).
+    const { data: created } = await sb.rpc('create_pin_user', { p_profile_id: selectedProfile.id, p_pin: pin });
+    if (created?.error) {
+      showPinError('Error: ' + created.error);
       return;
     }
-    if (!(su && su.session)) {
-      try { await sb.rpc('confirm_email', { p_email: email }); } catch(_) {}
-      const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
-      if (e2) { showPinError('No se pudo crear la clave. Intenta de nuevo.'); return; }
+    // Sign in con el PIN recién creado (o existente).
+    const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
+    if (e2) {
+      showPinError(created?.existing ? 'PIN incorrecto.' : 'Error al iniciar sesión: ' + e2.message);
+      return;
     }
-    // onAuthStateChange → boot() → register_profile() vincula el perfil.
+    // onAuthStateChange → boot() → register_profile() retorna el perfil.
   } finally {
     $('pin-keypad').style.opacity = '1';
   }
