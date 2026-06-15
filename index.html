@@ -301,6 +301,41 @@
     .admin-msg { font-size: 0.75rem; color: var(--accent); margin-top: 4px; min-height: 18px; }
     .btn-close-admin { display: block; width: 100%; margin-top: 14px; background: var(--bg); color: var(--text-2); border-radius: 12px; padding: 12px; font-size: 0.9rem; font-weight: 600; }
 
+    /* ── PROFILE MODAL ──────────────────────────────────────── */
+    #profile-modal { position: fixed; inset: 0; z-index: 400; display: flex; align-items: flex-end; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); }
+    .prof-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 540px; margin: 0 auto; max-height: 90vh; overflow-y: auto; }
+    .prof-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+    .prof-header { padding: 16px 20px 12px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); position: relative; }
+    .prof-avatar-lg { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 1.3rem; font-weight: 800; color: #fff; overflow: hidden; flex-shrink: 0; }
+    .prof-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
+    .prof-name { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+    .prof-sub  { font-size: 0.76rem; color: var(--text-2); margin-top: 2px; }
+    .prof-close { position: absolute; top: 14px; right: 16px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-2); }
+    .prof-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+    .prof-stat { background: var(--bg); border-radius: 10px; padding: 10px 8px; text-align: center; }
+    .prof-stat-num { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .prof-stat-lbl { font-size: 0.58rem; font-weight: 600; color: var(--text-3); text-transform: uppercase; margin-top: 2px; }
+    .prof-section { padding: 12px 20px; }
+    .prof-section-title { font-size: 0.63rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; display: block; }
+    .prof-phase-lbl { font-size: 0.68rem; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: .5px; background: var(--bg); border-radius: 6px; padding: 4px 10px; display: inline-block; margin: 10px 0 6px; }
+    .prof-pred-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); gap: 8px; }
+    .prof-pred-row:last-child { border-bottom: none; }
+    .prof-pred-match { flex: 1; font-size: 0.8rem; color: var(--text); min-width: 0; }
+    .prof-pred-score { font-weight: 700; }
+    .prof-pred-result { font-size: 0.68rem; color: var(--text-3); margin-top: 1px; }
+    .prof-summary { font-size: 0.76rem; color: var(--text-2); margin-bottom: 4px; }
+
+    /* ── INLINE PREDS (Resultados) ───────────────────────────── */
+    .inline-preds { border-top: 1px solid var(--border); }
+    .inline-preds-header { padding: 6px 12px; font-size: 0.62rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .inline-pred-row { display: flex; align-items: center; padding: 8px 12px; border-top: 1px solid var(--border); gap: 8px; cursor: pointer; }
+    .inline-pred-row:hover { background: var(--bg); }
+    .inline-pred-name { font-size: 0.8rem; font-weight: 500; color: var(--text); flex: 1; }
+    .inline-pred-score { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--score-bg); width: 36px; text-align: center; }
+    .result-card.tappable { cursor: pointer; }
+    .result-card.expanded { box-shadow: 0 4px 14px rgba(0,0,0,.1); }
+    .live-clock-row { text-align: center; font-size: 0.72rem; color: var(--live); font-weight: 700; padding: 3px 0 6px; }
+
     /* ── TOAST ──────────────────────────────────────────────── */
     #toast { position: fixed; bottom: calc(var(--nav-h) + 16px); left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.84rem; font-weight: 500; z-index: 500; opacity: 0; transition: opacity 0.25s; white-space: nowrap; max-width: calc(100vw - 32px); pointer-events: none; }
     #toast.show { opacity: 1; }
@@ -323,9 +358,9 @@
 <!-- ── LOGIN ────────────────────────────────────────────────── -->
 <div id="login-screen">
   <div class="login-logo">
-    <div class="login-logo-sup">Club Deportivo</div>
+    <div class="login-logo-sup">Polla Mundialista 2026</div>
     <h1>NORTE VERDE</h1>
-    <p>Polla Mundial FIFA 2026</p>
+    <p>Club Deportivo Norte Verde</p>
   </div>
   <div class="login-subtitle">Selecciona tu perfil</div>
   <div class="profile-grid" id="profile-grid">
@@ -370,7 +405,7 @@
 <div id="app" class="hidden">
   <div id="topbar">
     <div class="topbar-brand">
-      <span class="topbar-brand-label">Club Deportivo</span>
+      <span class="topbar-brand-label">Polla Mundialista 2026</span>
       <span class="topbar-brand-name">NORTE VERDE</span>
     </div>
     <div class="topbar-right">
@@ -432,6 +467,30 @@
 
 <!-- ── TOAST ─────────────────────────────────────────────────── -->
 <div id="toast"></div>
+
+<!-- ── PROFILE MODAL ──────────────────────────────────────────── -->
+<div id="profile-modal" class="hidden">
+  <div class="prof-sheet">
+    <div class="prof-handle"></div>
+    <div class="prof-header">
+      <div class="prof-avatar-lg" id="prof-avatar-lg"></div>
+      <div>
+        <div class="prof-name" id="prof-name"></div>
+        <div class="prof-sub" id="prof-sub"></div>
+      </div>
+      <button class="prof-close" id="prof-close">✕</button>
+    </div>
+    <div class="prof-stats" id="prof-stats"></div>
+    <div class="prof-section">
+      <span class="prof-section-title">Aciertos por fase</span>
+      <div id="prof-fase-summary"></div>
+    </div>
+    <div class="prof-section">
+      <span class="prof-section-title">Todos sus pronósticos</span>
+      <div id="prof-preds-list"><div class="empty">Cargando...</div></div>
+    </div>
+  </div>
+</div>
 
 <!-- ── ADMIN MODAL ───────────────────────────────────────────── -->
 <div id="admin-modal" class="hidden">
@@ -510,6 +569,7 @@ let currentGroup = 'Todos', currentRound = '16avos';
 let selectedProfile = null, pinDigits = [];
 let pendingPreds = {}, pendingBonus = {};
 let liveInterval = null;
+let expandedMatchId = null;
 
 // ── HELPERS ───────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -527,7 +587,7 @@ const avatarHTML = (url, name, size = 40) =>
   url ? `<img src="${url}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover">`
       : `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${avatarBg(name)};display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:${Math.floor(size*0.38)}px;font-weight:800;color:#fff">${initials(name)}</div>`;
 const chipHTML = (p) =>
-  `<div class="pick-chip" title="${p.profile_name}" style="background:${chipColor(p.profile_name)}">${p.avatar_url ? `<img src="${p.avatar_url}">` : initials(p.profile_name)}</div>`;
+  `<div class="pick-chip" title="${p.profile_name}" data-pid="${p.profile_id}" style="background:${chipColor(p.profile_name)};cursor:pointer">${p.avatar_url ? `<img src="${p.avatar_url}">` : initials(p.profile_name)}</div>`;
 
 let _toastTimer;
 function showToast(msg, type = 'ok') {
@@ -832,6 +892,98 @@ async function savePreds(isFinal) {
   showToast(isFinal ? '¡Predicciones enviadas!' : 'Borrador guardado ✓');
 }
 
+// ── PROFILE MODAL ────────────────────────────────────────────
+function calcPosMap() {
+  let pos = 1; const pm = {};
+  leaderboard.forEach((p, i) => {
+    if (i > 0 && p.pts_total === leaderboard[i-1].pts_total && p.exact_count === leaderboard[i-1].exact_count)
+      pm[p.id] = pm[leaderboard[i-1].id];
+    else pm[p.id] = pos; pos++;
+  });
+  return pm;
+}
+
+async function openProfileModal(profileId) {
+  const profile = leaderboard.find(p => p.id === profileId);
+  if (!profile) return;
+  const pm = calcPosMap();
+  const pos = pm[profileId] || '—';
+
+  // Populate header immediately
+  const avEl = $('prof-avatar-lg');
+  avEl.style.background = avatarBg(profile.name);
+  avEl.innerHTML = profile.avatar_url
+    ? `<img src="${profile.avatar_url}">`
+    : initials(profile.name);
+  $('prof-name').textContent = profile.name;
+  $('prof-sub').textContent = `Puesto ${pos}° · ${profile.pts_total} pts · ${profile.exact_count ?? 0} exactos`;
+  $('prof-stats').innerHTML = `
+    <div class="prof-stat"><div class="prof-stat-num">${profile.pts_grupos ?? 0}</div><div class="prof-stat-lbl">Grupos</div></div>
+    <div class="prof-stat"><div class="prof-stat-num">${profile.pts_eliminatorias ?? 0}</div><div class="prof-stat-lbl">Elim</div></div>
+    <div class="prof-stat"><div class="prof-stat-num">${profile.pts_bonus ?? 0}</div><div class="prof-stat-lbl">Extras</div></div>
+    <div class="prof-stat"><div class="prof-stat-num">${profile.pts_total}</div><div class="prof-stat-lbl">Total</div></div>`;
+  $('prof-preds-list').innerHTML = '<div class="empty">Cargando...</div>';
+  $('prof-fase-summary').innerHTML = '';
+  $('profile-modal').classList.remove('hidden');
+
+  // Load predictions
+  let preds;
+  if (profileId === me.id) {
+    preds = Object.values(myPreds).map(pr => {
+      const m = allMatches.find(x => x.id === pr.match_id);
+      if (!m || m.status !== 'FINALIZADO') return null;
+      return { pred_home: pr.home_goals, pred_away: pr.away_goals, points: pr.points, is_exact: pr.is_exact,
+               match_id: m.id, match_number: m.match_number, home_team: m.home_team, away_team: m.away_team,
+               actual_home: m.home_goals, actual_away: m.away_goals, status: m.status, phase: m.phase, group_name: m.group_name };
+    }).filter(Boolean).sort((a,b) => a.match_number - b.match_number);
+  } else {
+    const { data } = await sb.rpc('get_profile_predictions', { p_profile_id: profileId });
+    preds = data || [];
+  }
+
+  if (!preds.length) {
+    $('prof-preds-list').innerHTML = '<div class="empty">Sin pronósticos finalizados aún.</div>';
+    return;
+  }
+
+  // Stats summary by phase
+  const phaseStats = {};
+  preds.forEach(p => {
+    const ph = p.phase || 'Grupos';
+    if (!phaseStats[ph]) phaseStats[ph] = { exactos: 0, ganador: 0, fallo: 0 };
+    if (p.is_exact) phaseStats[ph].exactos++;
+    else if (p.points > 0) phaseStats[ph].ganador++;
+    else phaseStats[ph].fallo++;
+  });
+  const totalFinalized = preds.length;
+  const totalEnabled = allMatches.filter(m => m.enabled).length;
+  $('prof-fase-summary').innerHTML = Object.entries(phaseStats).map(([ph, s]) =>
+    `<p class="prof-summary"><b>${ph}:</b> ${s.exactos} exactos · ${s.ganador} ganador · ${s.fallo} fallados · ${totalEnabled - totalFinalized} por jugar</p>`
+  ).join('');
+
+  // Predictions list grouped by phase
+  const byPhase = {};
+  preds.forEach(p => { const ph = p.phase || 'Grupos'; if (!byPhase[ph]) byPhase[ph] = []; byPhase[ph].push(p); });
+  $('prof-preds-list').innerHTML = Object.entries(byPhase).map(([ph, list]) => `
+    <span class="prof-phase-lbl">${ph.toUpperCase()}</span>
+    ${list.map(p => {
+      let badge = '';
+      if (p.is_exact) badge = `<span class="ticket-pts pts-exact">EXACTO +${p.points}</span>`;
+      else if (p.points > 0) badge = `<span class="ticket-pts pts-winner">GANADOR +${p.points}</span>`;
+      else badge = `<span class="ticket-pts pts-fail">Falló</span>`;
+      return `<div class="prof-pred-row">
+        <div class="prof-pred-match">
+          <div class="prof-pred-score">${flagFor(p.home_team)} ${p.home_team} <b>${p.pred_home}–${p.pred_away}</b> ${p.away_team} ${flagFor(p.away_team)}</div>
+          <div class="prof-pred-result">Resultado: ${p.actual_home}–${p.actual_away}</div>
+        </div>
+        ${badge}
+      </div>`;
+    }).join('')}
+  `).join('');
+}
+
+function closeProfileModal() { $('profile-modal').classList.add('hidden'); }
+
 // ── TABLA ─────────────────────────────────────────────────────
 function renderTabla() {
   const container = $('view-tabla');
@@ -839,12 +991,7 @@ function renderTabla() {
     container.innerHTML = `<div class="view-header"><div class="view-header-label">Clasificación</div><div class="view-header-title">TABLA GENERAL</div></div><div class="empty">Sin datos aún.</div>`;
     return;
   }
-  let pos = 1; const posMap = {};
-  leaderboard.forEach((p, i) => {
-    if (i > 0 && p.pts_total === leaderboard[i-1].pts_total && p.exact_count === leaderboard[i-1].exact_count)
-      posMap[p.id] = posMap[leaderboard[i-1].id];
-    else posMap[p.id] = pos; pos++;
-  });
+  const posMap = calcPosMap();
   const prizes = { 1: config.prize_1||null, 2: config.prize_2||null, 3: config.prize_3||null };
   const prizePool = config.prize_pool || null;
   const prizeBar = prizePool
@@ -875,7 +1022,7 @@ function renderTabla() {
 
   const rows = leaderboard.map(p => {
     const pos3 = posMap[p.id], prz = prizes[pos3] || null;
-    return `<tr class="${p.id === me?.id ? 'me' : ''}">
+    return `<tr class="${p.id === me?.id ? 'me' : ''}" style="cursor:pointer" data-pid="${p.id}">
       <td class="lb-pos">${pos3}°</td>
       <td><div class="lb-name">${avatarHTML(p.avatar_url, p.name, 22)}
         <span>${p.name}${p.id===me?.id?' <span class="lb-you">tú</span>':''}${rankHTML(p)}${prz?`<span class="lb-name-sub">${prz}</span>`:''}</span>
@@ -896,6 +1043,9 @@ function renderTabla() {
       <thead><tr><th>#</th><th>Jugador</th><th>GRU</th><th>ELI</th><th>EXT</th><th style="color:var(--accent)">EXA</th><th>TOTAL</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
+
+  container.querySelectorAll('tr[data-pid]').forEach(tr =>
+    tr.addEventListener('click', () => openProfileModal(parseInt(tr.dataset.pid))));
 }
 
 // ── RESULTADOS ────────────────────────────────────────────────
@@ -917,8 +1067,10 @@ function renderResultados() {
   const done = matches.filter(m => m.status === 'FINALIZADO');
   const upcoming = matches.filter(m => m.status !== 'EN_JUEGO' && m.status !== 'FINALIZADO');
 
-  const makeCard = m => {
+  const makeCard = (m, inlinePreds) => {
     const isLive = m.status === 'EN_JUEGO', isDone = m.status === 'FINALIZADO';
+    const isExpanded = expandedMatchId === m.id;
+    const canTap = isDone || isLive;
     const pred = myPreds[m.id];
     const scoreEl = (isDone || isLive)
       ? `<div class="score-pill${isLive?' live-p':''}">${m.home_goals}—${m.away_goals}</div>`
@@ -929,32 +1081,86 @@ function renderResultados() {
       else if (pred.points > 0) ptsTag = `<span class="ticket-pts pts-winner">↗ +${pred.points}</span>`;
       else ptsTag = `<span class="ticket-pts pts-fail">✗</span>`;
     }
-    const scorers = [m.home_scorers, m.away_scorers].filter(Boolean);
-    return `<div class="result-card${isLive?' is-live':''}">
+    // Scorers columns
+    const hsc = (m.home_scorers||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const asc = (m.away_scorers||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const maxRows = Math.max(hsc.length, asc.length);
+    let scorersHTML = '';
+    if (maxRows > 0) {
+      const rows = Array.from({length: maxRows}, (_,i) =>
+        `<tr><td style="font-size:.67rem;color:var(--text-2);padding:1px 0">${hsc[i]?'⚽ '+hsc[i]:''}</td>
+             <td style="font-size:.67rem;color:var(--text-2);padding:1px 0;text-align:right">${asc[i]?asc[i]+' ⚽':''}</td></tr>`
+      ).join('');
+      scorersHTML = `<div style="padding:6px 12px 8px;border-top:1px solid var(--border)"><table style="width:100%;border-collapse:collapse">${rows}</table></div>`;
+    }
+    // Inline preds
+    let predsHTML = '';
+    if (isExpanded && inlinePreds) {
+      predsHTML = `<div class="inline-preds">
+        <div class="inline-preds-header"><span>Pronósticos</span><span style="color:var(--text-3);font-size:.6rem">${inlinePreds.length} participantes</span></div>
+        ${inlinePreds.map(p => {
+          let badge = '';
+          if (p.is_exact) badge = `<span class="ticket-pts pts-exact">Exacto +${p.points}</span>`;
+          else if (p.points > 0) badge = `<span class="ticket-pts pts-winner">+${p.points}</span>`;
+          else if (p.points !== null && p.points !== undefined) badge = `<span class="ticket-pts pts-fail">✗</span>`;
+          return `<div class="inline-pred-row" data-pid="${p.profile_id}">
+            <span class="inline-pred-name">${p.profile_name}</span>
+            <span class="inline-pred-score">${p.home_goals}–${p.away_goals}</span>
+            ${badge}
+          </div>`;
+        }).join('')}
+      </div>`;
+    } else if (isExpanded) {
+      predsHTML = `<div class="inline-preds"><div class="inline-preds-header"><span>Pronósticos</span></div><div class="empty" style="padding:14px">Cargando...</div></div>`;
+    }
+
+    return `<div class="result-card${isLive?' is-live':''}${canTap?' tappable':''}${isExpanded?' expanded':''}" data-mid="${m.id}" data-can-tap="${canTap}">
       <div class="result-header">
         <span>P${m.match_number} · ${m.phase}${m.group_name?' '+m.group_name:''}</span>
-        ${isLive?`<span style="color:var(--live);font-weight:700">🔴 ${m.live_clock||'En vivo'}</span>`:isDone?'<span style="color:var(--exact-c)">✓</span>':''}
+        ${isLive?`<span style="color:var(--live);font-weight:700">🔴 En vivo</span>`:isDone?'<span style="color:var(--exact-c)">✓ Final</span>':''}
       </div>
       <div class="result-body">
         <div class="result-team"><span class="flag">${flagFor(m.home_team)}</span><span>${m.home_team}</span></div>
         ${scoreEl}
         <div class="result-team"><span class="flag">${flagFor(m.away_team)}</span><span>${m.away_team}</span></div>
       </div>
-      ${scorers.length?`<div class="result-scorers">⚽ ${scorers.join(' · ')}</div>`:''}
-      ${(isDone||pred)?`<div class="result-mypred"><span>Mi pronóstico: ${pred?pred.home_goals+'–'+pred.away_goals:'ninguno'}</span>${ptsTag}</div>`:''}
+      ${isLive && m.live_clock ? `<div class="live-clock-row">⏱ ${m.live_clock}'</div>` : ''}
+      ${scorersHTML}
+      ${(isDone && pred) ? `<div class="result-mypred"><span>Mi pronóstico: ${pred.home_goals}–${pred.away_goals}</span>${ptsTag}</div>` : ''}
+      ${predsHTML}
     </div>`;
   };
 
+  // Build inline preds map if we have an expanded match
+  const inlinePredsMap = {};
+  if (expandedMatchId !== null && selectedMatchPreds.length && matchPredMatchId === expandedMatchId) {
+    inlinePredsMap[expandedMatchId] = selectedMatchPreds;
+  }
+
   let html = `
     <div class="view-header"><div class="view-header-label">Marcadores</div><div class="view-header-title">RESULTADOS</div></div>
+    <p style="font-size:.72rem;color:var(--text-3);margin-bottom:10px">Toca un partido para ver los pronósticos de cada uno.</p>
     <div class="group-tabs">${tabsHTML}</div>`;
-  if (live.length) { html += `<div class="sec-divider"><div class="live-dot"></div><span class="sec-divider-label sec-live">En vivo</span><div class="sec-divider-line"></div></div>`; html += live.map(makeCard).join(''); }
-  if (done.length) { html += `<div class="sec-divider"><div class="sec-divider-line"></div><span class="sec-divider-label sec-done">Jugados</span><div class="sec-divider-line"></div></div>`; html += done.map(makeCard).join(''); }
-  if (upcoming.length) { html += `<div class="sec-divider"><div class="sec-divider-line"></div><span class="sec-divider-label sec-next">Próximos</span><div class="sec-divider-line"></div></div>`; html += upcoming.map(makeCard).join(''); }
+  if (live.length) { html += `<div class="sec-divider"><div class="live-dot"></div><span class="sec-divider-label sec-live">En vivo</span><div class="sec-divider-line"></div></div>`; html += live.map(m => makeCard(m, inlinePredsMap[m.id])).join(''); }
+  if (done.length) { html += `<div class="sec-divider"><div class="sec-divider-line"></div><span class="sec-divider-label sec-done">Jugados</span><div class="sec-divider-line"></div></div>`; html += done.map(m => makeCard(m, inlinePredsMap[m.id])).join(''); }
+  if (upcoming.length) { html += `<div class="sec-divider"><div class="sec-divider-line"></div><span class="sec-divider-label sec-next">Próximos</span><div class="sec-divider-line"></div></div>`; html += upcoming.map(m => makeCard(m, null)).join(''); }
   if (!live.length && !done.length && !upcoming.length) html += '<div class="empty">No hay partidos aquí.</div>';
 
   container.innerHTML = html;
   container.querySelectorAll('.group-tab').forEach(t => t.addEventListener('click', () => { currentGroup = t.dataset.g; renderResultados(); }));
+
+  // Tap to expand predictions
+  container.querySelectorAll('.result-card[data-can-tap="true"]').forEach(card => {
+    card.addEventListener('click', async e => {
+      if (e.target.closest('[data-pid]')) { openProfileModal(parseInt(e.target.closest('[data-pid]').dataset.pid)); return; }
+      const mid = parseInt(card.dataset.mid);
+      if (expandedMatchId === mid) { expandedMatchId = null; matchPredMatchId = null; selectedMatchPreds = []; renderResultados(); return; }
+      expandedMatchId = mid;
+      renderResultados();
+      await loadMatchPreds(mid);
+      renderResultados();
+    });
+  });
 }
 
 // ── LLAVE ─────────────────────────────────────────────────────
@@ -1021,7 +1227,7 @@ function renderResto() {
       if (p.is_exact) tag = `<span class="ticket-pts pts-exact">✓ Exacto +${p.points}</span>`;
       else if (p.points > 0) tag = `<span class="ticket-pts pts-winner">↗ +${p.points}</span>`;
       else if (p.points !== null && p.points !== undefined) tag = `<span class="ticket-pts pts-fail">✗</span>`;
-      return `<div class="match-pred-row">
+      return `<div class="match-pred-row" data-pid="${p.profile_id}" style="cursor:pointer">
         <div class="match-pred-name">${avatarHTML(p.avatar_url, p.profile_name, 28)}<span>${p.profile_name}</span></div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="match-pred-score">${p.home_goals}–${p.away_goals}</span>${tag}
@@ -1050,6 +1256,14 @@ function renderResto() {
       <span class="pick-name${isLeader?' is-leader':''}">${name}</span>
       <div class="pick-chips">${pickers.map(chipHTML).join('')}</div>
     </div>`;
+
+  // After rendering, wire chip clicks
+  const wireChips = () => {
+    container.querySelectorAll('.pick-chip[data-pid]').forEach(chip =>
+      chip.addEventListener('click', () => openProfileModal(parseInt(chip.dataset.pid))));
+    container.querySelectorAll('.match-pred-row[data-pid]').forEach(row =>
+      row.addEventListener('click', () => openProfileModal(parseInt(row.dataset.pid))));
+  };
 
   const bonusHTML = allBonusPicks.length ? `
     <span class="resto-section-label">Apuestas especiales</span>
@@ -1080,6 +1294,7 @@ function renderResto() {
     await loadMatchPreds(matchId);
     renderResto();
   });
+  wireChips();
 }
 
 // ── PLANTELES ─────────────────────────────────────────────────
@@ -1181,6 +1396,8 @@ function setupEvents() {
     }));
   $('pin-del').addEventListener('click', () => { pinDigits.pop(); updatePinDots(); $('pin-error').textContent = ''; });
   $('pin-cancel').addEventListener('click', closePinModal);
+  $('prof-close').addEventListener('click', closeProfileModal);
+  $('profile-modal').addEventListener('click', e => { if (e.target === $('profile-modal')) closeProfileModal(); });
   document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', () => navigate(n.dataset.view)));
   $('btn-logout').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
   $('btn-admin').addEventListener('click', () => { updateAdminToggles(); $('admin-modal').classList.remove('hidden'); });
