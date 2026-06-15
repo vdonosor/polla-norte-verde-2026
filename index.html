@@ -890,12 +890,15 @@ async function handlePin() {
       return;
     }
 
-    // Usuario nuevo: crear cuenta directo en BD (evita problemas con signUp/SMTP).
-    const { data: created } = await sb.rpc('create_pin_user', { p_profile_id: selectedProfile.id, p_pin: pin });
-    if (created?.error) {
-      showPinError('Error: ' + created.error);
-      return;
-    }
+    // Usuario nuevo: crear cuenta via Netlify Function (usa Supabase Admin API).
+    const res = await fetch('/.netlify/functions/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId: selectedProfile.id, pin })
+    });
+    const created = await res.json();
+    if (created?.error) { showPinError('Error: ' + created.error); return; }
+
     // Sign in con el PIN recién creado (o existente).
     const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
     if (e2) {
