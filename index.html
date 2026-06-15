@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Polla Norte Verde 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde:      #0d2818;
+      --verde-mid:  #1a3d26;
+      --verde-soft: #2d5c3a;
+      --accent:     #4ade80;
+      --accent-dk:  #16a34a;
+      --white:      #ffffff;
+      --bg:         #f0fdf4;
+      --gray-100:   #f1f5f9;
+      --gray-200:   #e2e8f0;
+      --gray-400:   #94a3b8;
+      --gray-600:   #475569;
+      --red:        #ef4444;
+      --green:      #22c55e;
+      --font-head:  'Barlow Condensed', sans-serif;
+      --font-body:  'Inter', sans-serif;
+      --nav-h:      64px;
+      --top-h:      56px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: var(--font-body); background: var(--bg); color: var(--verde); }
+    .hidden { display: none !important; }
+    button { cursor: pointer; border: none; font-family: var(--font-body); }
+    input  { font-family: var(--font-body); }
+
+    /* ── LOGIN ─────────────────────────────────────────────── */
+    #login-screen {
+      min-height: 100vh;
+      background: var(--verde);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 40px;
+    }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo h1 {
+      font-family: var(--font-head);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+    .login-logo p { color: var(--gray-400); font-size: 0.85rem; margin-top: 4px; }
+    .login-subtitle {
+      color: var(--gray-400);
+      font-size: 0.8rem;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .profile-card {
+      background: var(--verde-mid);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .profile-card:hover { border-color: var(--accent); background: var(--verde-soft); }
+    .profile-avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--verde-soft);
+      margin: 0 auto 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head);
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--accent);
+      overflow: hidden;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-card-name { color: var(--white); font-weight: 600; font-size: 0.9rem; }
+    .profile-card-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .badge-pin  { background: var(--accent); color: var(--verde); }
+    .badge-new  { background: var(--verde-soft); color: var(--gray-400); }
+
+    /* ── PIN MODAL ──────────────────────────────────────────── */
+    #pin-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 200;
+    }
+    .pin-sheet {
+      background: var(--verde-mid);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 24px 40px;
+      width: 100%; max-width: 400px;
+    }
+    .pin-sheet-header { text-align: center; margin-bottom: 20px; }
+    .pin-sheet-header h2 { color: var(--white); font-size: 1.1rem; font-weight: 600; }
+    .pin-sheet-header p  { color: var(--gray-400); font-size: 0.8rem; margin-top: 4px; }
+    .pin-dots {
+      display: flex; gap: 12px; justify-content: center; margin-bottom: 24px;
+    }
+    .pin-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-400);
+      background: transparent;
+      transition: all 0.15s;
+    }
+    .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .pin-key {
+      background: var(--verde-soft);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 1.3rem; font-weight: 600;
+      color: var(--white);
+      text-align: center;
+      transition: all 0.1s;
+    }
+    .pin-key:active { background: var(--accent-dk); transform: scale(0.96); }
+    .pin-key.del   { font-size: 1rem; color: var(--gray-400); }
+    .pin-key.empty { background: transparent; pointer-events: none; }
+    .pin-error { color: var(--red); font-size: 0.8rem; text-align: center; margin-top: 8px; min-height: 20px; }
+    .pin-cancel {
+      display: block; width: 100%; margin-top: 16px;
+      background: transparent; color: var(--gray-400);
+      font-size: 0.9rem; padding: 10px;
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────────────── */
+    #topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--top-h);
+      background: var(--verde);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+    .topbar-logo {
+      font-family: var(--font-head);
+      font-weight: 800; font-size: 1.1rem;
+      color: var(--accent); letter-spacing: 0.5px;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-user {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+    }
+    .topbar-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--verde-soft);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: var(--accent);
+      overflow: hidden;
+    }
+    .topbar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .topbar-name { color: var(--white); font-size: 0.85rem; font-weight: 500; }
+    .btn-admin {
+      background: var(--verde-soft);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 1rem;
+    }
+    .btn-logout {
+      background: transparent;
+      color: var(--gray-400);
+      font-size: 0.75rem;
+      padding: 6px;
+    }
+
+    /* ── APP LAYOUT ─────────────────────────────────────────── */
+    #app {
+      padding-top: var(--top-h);
+      padding-bottom: var(--nav-h);
+      min-height: 100vh;
+    }
+    .view { display: none; padding: 16px; }
+    .view.active { display: block; }
+
+    /* ── BOTTOM NAV ─────────────────────────────────────────── */
+    #bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--verde);
+      display: flex; align-items: stretch;
+      z-index: 100;
+      border-top: 1px solid var(--verde-soft);
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; color: var(--gray-400);
+      cursor: pointer; transition: color 0.15s;
+      background: transparent; border: none; font-family: var(--font-body);
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-icon { font-size: 1.3rem; line-height: 1; }
+    .nav-label { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+
+    /* ── CARDS ──────────────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(13,40,24,0.08);
+    }
+    .card-header {
+      background: var(--verde);
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 {
+      font-family: var(--font-head);
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--white); letter-spacing: 0.5px;
+    }
+    .card-body { padding: 16px; }
+
+    /* ── PHASE TABS ─────────────────────────────────────────── */
+    .phase-tabs {
+      display: flex; gap: 8px;
+      overflow-x: auto;
+      padding: 0 0 4px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .phase-tabs::-webkit-scrollbar { display: none; }
+    .phase-tab {
+      flex-shrink: 0;
+      background: var(--white);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem; font-weight: 600;
+      color: var(--gray-600);
+      transition: all 0.15s;
+    }
+    .phase-tab.active {
+      background: var(--verde);
+      border-color: var(--verde);
+      color: var(--accent);
+    }
+    .phase-tab.locked { color: var(--gray-400); }
+
+    /* ── MATCH TICKET ───────────────────────────────────────── */
+    .match-ticket {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1.5px solid var(--gray-200);
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .match-ticket.has-pred { border-color: #bbf7d0; }
+    .match-ticket.locked   { opacity: 0.7; }
+    .ticket-header {
+      background: var(--gray-100);
+      padding: 6px 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ticket-header-left { font-size: 0.72rem; color: var(--gray-600); }
+    .ticket-status {
+      font-size: 0.65rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .status-live     { background: #fef2f2; color: var(--red); }
+    .status-done     { background: #dcfce7; color: #166534; }
+    .status-upcoming { background: var(--gray-100); color: var(--gray-400); }
+    .ticket-body {
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px; align-items: center;
+    }
+    .ticket-team {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-size: 0.8rem; font-weight: 600; color: var(--verde);
+      text-align: center;
+    }
+    .ticket-team .flag { font-size: 1.4rem; }
+    .ticket-score {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .score-input-group {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .score-btn {
+      width: 24px; height: 18px;
+      background: var(--gray-100);
+      border-radius: 4px;
+      font-size: 0.65rem; color: var(--gray-600);
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .score-val {
+      width: 40px; height: 36px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 6px;
+      font-size: 1.2rem; font-weight: 700;
+      text-align: center;
+      color: var(--verde);
+      background: var(--white);
+    }
+    .score-val:focus { outline: none; border-color: var(--accent-dk); }
+    .score-val.readonly { background: var(--gray-100); border-color: transparent; cursor: default; }
+    .score-sep { font-size: 1.1rem; color: var(--gray-400); font-weight: 700; padding: 0 2px; }
+    .ticket-footer {
+      padding: 6px 12px;
+      border-top: 1px solid var(--gray-100);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .ticket-stadium { font-size: 0.68rem; color: var(--gray-400); }
+    .ticket-pts {
+      font-size: 0.72rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .pts-exact  { background: #dcfce7; color: #166534; }
+    .pts-winner { background: #fefce8; color: #854d0e; }
+    .pts-fail   { background: #fef2f2; color: #991b1b; }
+    .pts-none   { background: var(--gray-100); color: var(--gray-400); }
+
+    /* ── SUBMIT BANNER ──────────────────────────────────────── */
+    .submitted-banner {
+      background: #dcfce7;
+      border: 1.5px solid #86efac;
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: #166534;
+      font-size: 0.85rem; font-weight: 600;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .deadline-warning {
+      background: #fefce8;
+      border: 1.5px solid #fde68a;
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: #854d0e;
+      font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    /* ── ACTION BUTTONS ─────────────────────────────────────── */
+    .actions-bar {
+      position: sticky; bottom: calc(var(--nav-h) + 8px);
+      display: flex; gap: 10px;
+      padding: 10px 0;
+      background: linear-gradient(transparent, var(--bg) 40%);
+    }
+    .btn-draft {
+      flex: 1;
+      background: var(--verde-soft);
+      color: var(--white);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.9rem; font-weight: 600;
+    }
+    .btn-submit {
+      flex: 2;
+      background: var(--accent);
+      color: var(--verde);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.9rem; font-weight: 700;
+    }
+    .btn-submit:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
+
+    /* ── BONUS BLOCK ────────────────────────────────────────── */
+    .bonus-block {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1.5px solid #bbf7d0;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .bonus-title {
+      font-family: var(--font-head);
+      font-size: 1rem; font-weight: 700;
+      color: var(--verde); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .bonus-row { margin-bottom: 10px; }
+    .bonus-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--gray-600); text-transform: uppercase;
+      letter-spacing: 0.3px; margin-bottom: 4px;
+    }
+    .bonus-input {
+      width: 100%;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      color: var(--verde);
+      background: var(--bg);
+    }
+    .bonus-input:focus { outline: none; border-color: var(--accent-dk); }
+    .bonus-input:disabled { background: var(--gray-100); color: var(--gray-400); cursor: default; }
+    .bonus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ── TABLA / LEADERBOARD ────────────────────────────────── */
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 8px;
+      margin: 8px 0 24px;
+      padding: 0 8px;
+    }
+    .podium-slot {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; max-width: 120px;
+    }
+    .podium-slot:nth-child(1) { order: 2; }
+    .podium-slot:nth-child(2) { order: 1; }
+    .podium-slot:nth-child(3) { order: 3; }
+    .podium-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-size: 1.3rem; font-weight: 700;
+      color: var(--verde); margin-bottom: 6px;
+      overflow: hidden;
+      border: 3px solid transparent;
+    }
+    .podium-slot:nth-child(1) .podium-avatar { width: 60px; height: 60px; font-size: 1.5rem; border-color: #f59e0b; }
+    .podium-slot:nth-child(2) .podium-avatar { border-color: #94a3b8; }
+    .podium-slot:nth-child(3) .podium-avatar { border-color: #d97706; }
+    .podium-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .podium-name { font-size: 0.75rem; font-weight: 600; color: var(--verde); text-align: center; margin-bottom: 4px; }
+    .podium-pts  { font-size: 0.9rem; font-weight: 700; color: var(--verde-mid); }
+    .podium-block {
+      width: 100%; border-radius: 8px 8px 0 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-size: 1.4rem; font-weight: 800;
+    }
+    .podium-slot:nth-child(1) .podium-block { height: 60px; background: #f59e0b; color: var(--white); }
+    .podium-slot:nth-child(2) .podium-block { height: 44px; background: #94a3b8; color: var(--white); }
+    .podium-slot:nth-child(3) .podium-block { height: 32px; background: #d97706; color: var(--white); }
+    .leaderboard-table { width: 100%; border-collapse: collapse; }
+    .leaderboard-table th {
+      text-align: left; font-size: 0.65rem; font-weight: 700;
+      color: var(--gray-400); text-transform: uppercase;
+      padding: 6px 8px; border-bottom: 1px solid var(--gray-200);
+    }
+    .leaderboard-table td { padding: 9px 8px; border-bottom: 1px solid var(--gray-100); font-size: 0.85rem; }
+    .leaderboard-table tr.me td { background: #f0fdf4; }
+    .lb-pos { font-weight: 700; color: var(--verde); width: 28px; }
+    .lb-name { font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .lb-you { font-size: 0.65rem; background: var(--accent); color: var(--verde); padding: 1px 6px; border-radius: 8px; font-weight: 700; }
+    .lb-num { text-align: right; color: var(--gray-600); width: 36px; }
+    .lb-total { text-align: right; font-weight: 700; color: var(--verde); width: 40px; }
+    .lb-arrow { font-size: 0.75rem; width: 16px; }
+    .arrow-up   { color: var(--green); }
+    .arrow-down { color: var(--red); }
+
+    /* ── RESULTADOS ─────────────────────────────────────────── */
+    .group-tabs {
+      display: flex; gap: 6px; overflow-x: auto;
+      padding-bottom: 4px; margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .group-tabs::-webkit-scrollbar { display: none; }
+    .group-tab {
+      flex-shrink: 0;
+      background: var(--white);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.78rem; font-weight: 600;
+      color: var(--gray-600);
+      transition: all 0.15s;
+    }
+    .group-tab.active { background: var(--verde); border-color: var(--verde); color: var(--accent); }
+    .result-card {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1.5px solid var(--gray-200);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .result-header {
+      padding: 6px 12px;
+      background: var(--gray-100);
+      display: flex; justify-content: space-between;
+      font-size: 0.72rem; color: var(--gray-600);
+    }
+    .result-body {
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 6px; align-items: center;
+    }
+    .result-team { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.8rem; font-weight: 600; text-align: center; }
+    .result-team .flag { font-size: 1.2rem; }
+    .result-score {
+      font-family: var(--font-head); font-size: 1.6rem; font-weight: 800;
+      color: var(--verde); text-align: center; letter-spacing: 2px;
+    }
+    .result-score.upcoming { font-size: 1rem; color: var(--gray-400); }
+    .result-scorers { font-size: 0.68rem; color: var(--gray-400); margin-top: 4px; text-align: center; }
+    .result-mypred {
+      padding: 6px 12px;
+      border-top: 1px solid var(--gray-100);
+      font-size: 0.72rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .result-mypred span { color: var(--gray-600); }
+
+    /* ── PLANTELES ──────────────────────────────────────────── */
+    .search-input {
+      width: 100%;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      background: var(--white);
+      color: var(--verde);
+      margin-bottom: 14px;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent-dk); }
+    details { margin-bottom: 8px; }
+    details summary {
+      background: var(--verde);
+      color: var(--white);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 600; font-size: 0.9rem;
+      list-style: none;
+    }
+    details[open] summary { border-radius: 10px 10px 0 0; }
+    details summary::-webkit-details-marker { display: none; }
+    .squad-table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 0 0 10px 10px; overflow: hidden; }
+    .squad-table td { padding: 7px 12px; font-size: 0.82rem; border-bottom: 1px solid var(--gray-100); }
+    .squad-table td:first-child { width: 28px; text-align: center; color: var(--gray-400); font-size: 0.75rem; }
+    .pos-badge {
+      font-size: 0.6rem; font-weight: 700;
+      padding: 2px 5px; border-radius: 4px;
+      display: inline-block;
+    }
+    .pos-GK  { background: #fef3c7; color: #92400e; }
+    .pos-DF  { background: #dbeafe; color: #1e40af; }
+    .pos-MF  { background: #d1fae5; color: #065f46; }
+    .pos-FW  { background: #fee2e2; color: #991b1b; }
+
+    /* ── ADMIN MODAL ────────────────────────────────────────── */
+    #admin-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .admin-sheet {
+      background: var(--white);
+      border-radius: 20px 20px 0 0;
+      padding: 24px;
+      width: 100%; max-width: 480px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .admin-sheet h2 {
+      font-family: var(--font-head);
+      font-size: 1.2rem; font-weight: 700; color: var(--verde);
+      margin-bottom: 20px;
+    }
+    .admin-section { margin-bottom: 20px; }
+    .admin-section h3 { font-size: 0.8rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .admin-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .admin-input {
+      flex: 1; min-width: 100px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+    }
+    .admin-input:focus { outline: none; border-color: var(--accent-dk); }
+    .btn-admin-action {
+      background: var(--verde);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.85rem; font-weight: 600;
+    }
+    .btn-toggle {
+      flex: 1;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.85rem; font-weight: 600;
+    }
+    .btn-toggle.on  { background: var(--accent); color: var(--verde); }
+    .btn-toggle.off { background: var(--gray-200); color: var(--gray-600); }
+    .admin-msg { font-size: 0.78rem; color: var(--accent-dk); margin-top: 4px; min-height: 18px; }
+    .btn-close-admin {
+      display: block; width: 100%; margin-top: 16px;
+      background: var(--gray-100); color: var(--gray-600);
+      border-radius: 10px; padding: 12px;
+      font-size: 0.9rem; font-weight: 600;
+    }
+
+    /* ── EMPTY / LOADING ────────────────────────────────────── */
+    .loading { text-align: center; padding: 40px 0; color: var(--gray-400); font-size: 0.9rem; }
+    .empty   { text-align: center; padding: 40px 0; color: var(--gray-400); font-size: 0.85rem; }
+    .spinner {
+      display: inline-block; width: 24px; height: 24px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (min-width: 640px) {
+      .profile-grid { grid-template-columns: repeat(4, 1fr); }
+      .view { max-width: 600px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ──────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-logo">
+    <h1>POLLA NORTE VERDE</h1>
+    <p>Mundial FIFA 2026</p>
+  </div>
+  <div class="login-subtitle">Selecciona tu perfil</div>
+  <div class="profile-grid" id="profile-grid">
+    <div class="loading"><div class="spinner"></div><br>Cargando...</div>
+  </div>
+</div>
+
+<!-- ── PIN MODAL ──────────────────────────────────────────────── -->
+<div id="pin-modal" class="hidden">
+  <div class="pin-sheet">
+    <div class="pin-sheet-header">
+      <h2 id="pin-modal-title">Ingresa tu PIN</h2>
+      <p id="pin-modal-subtitle">4 dígitos</p>
+    </div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="dot-0"></div>
+      <div class="pin-dot" id="dot-1"></div>
+      <div class="pin-dot" id="dot-2"></div>
+      <div class="pin-dot" id="dot-3"></div>
+    </div>
+    <div class="pin-keypad" id="pin-keypad">
+      <button class="pin-key" data-d="1">1</button>
+      <button class="pin-key" data-d="2">2</button>
+      <button class="pin-key" data-d="3">3</button>
+      <button class="pin-key" data-d="4">4</button>
+      <button class="pin-key" data-d="5">5</button>
+      <button class="pin-key" data-d="6">6</button>
+      <button class="pin-key" data-d="7">7</button>
+      <button class="pin-key" data-d="8">8</button>
+      <button class="pin-key" data-d="9">9</button>
+      <button class="pin-key empty"></button>
+      <button class="pin-key" data-d="0">0</button>
+      <button class="pin-key del" id="pin-del">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+    <button class="pin-cancel" id="pin-cancel">Cancelar</button>
+  </div>
+</div>
+
+<!-- ── APP ───────────────────────────────────────────────────── -->
+<div id="app" class="hidden">
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="topbar-logo">NV 2026</div>
+    <div class="topbar-right">
+      <button class="btn-admin hidden" id="btn-admin">🛠️</button>
+      <div class="topbar-user" id="topbar-user">
+        <div class="topbar-avatar" id="topbar-avatar">?</div>
+        <span class="topbar-name" id="topbar-name">Usuario</span>
+      </div>
+      <button class="btn-logout" id="btn-logout">Salir</button>
+    </div>
+  </div>
+
+  <!-- Views -->
+  <div id="view-pronosticos" class="view active">
+    <div class="loading"><div class="spinner"></div><br>Cargando pronósticos...</div>
+  </div>
+
+  <div id="view-tabla" class="view">
+    <div class="loading"><div class="spinner"></div><br>Cargando tabla...</div>
+  </div>
+
+  <div id="view-resultados" class="view">
+    <div class="loading"><div class="spinner"></div><br>Cargando resultados...</div>
+  </div>
+
+  <div id="view-planteles" class="view">
+    <input type="search" class="search-input" id="squad-search" placeholder="Buscar jugador...">
+    <div id="squad-list"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- Bottom nav -->
+  <nav id="bottom-nav">
+    <button class="nav-item active" data-view="pronosticos">
+      <span class="nav-icon">✏️</span>
+      <span class="nav-label">Pronósticos</span>
+    </button>
+    <button class="nav-item" data-view="tabla">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-label">Tabla</span>
+    </button>
+    <button class="nav-item" data-view="resultados">
+      <span class="nav-icon">⚽</span>
+      <span class="nav-label">Resultados</span>
+    </button>
+    <button class="nav-item" data-view="planteles">
+      <span class="nav-icon">👕</span>
+      <span class="nav-label">Planteles</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ── ADMIN MODAL ────────────────────────────────────────────── -->
+<div id="admin-modal" class="hidden">
+  <div class="admin-sheet">
+    <h2>🛠️ Panel Admin</h2>
+
+    <div class="admin-section">
+      <h3>Registrar resultado</h3>
+      <div class="admin-row">
+        <input class="admin-input" id="adm-match" type="number" placeholder="N° partido (1-104)" min="1" max="104">
+      </div>
+      <div class="admin-row">
+        <input class="admin-input" id="adm-home" type="number" placeholder="Goles local" min="0" max="20">
+        <input class="admin-input" id="adm-away" type="number" placeholder="Goles visita" min="0" max="20">
+      </div>
+      <div class="admin-row">
+        <input class="admin-input" id="adm-scorers-h" type="text" placeholder="Goleadores local (separados por coma)">
+      </div>
+      <div class="admin-row">
+        <input class="admin-input" id="adm-scorers-a" type="text" placeholder="Goleadores visita">
+      </div>
+      <button class="btn-admin-action" id="adm-btn-result">Guardar resultado</button>
+      <div class="admin-msg" id="adm-msg-result"></div>
+    </div>
+
+    <div class="admin-section">
+      <h3>Habilitar fase eliminatoria</h3>
+      <div class="admin-row">
+        <select class="admin-input" id="adm-phase">
+          <option value="16avos">16avos de final</option>
+          <option value="8vos">8vos de final</option>
+          <option value="4tos">Cuartos de final</option>
+          <option value="Semis">Semifinales</option>
+          <option value="3er lugar">3er lugar</option>
+          <option value="Final">Final</option>
+        </select>
+        <button class="btn-admin-action" id="adm-btn-phase">Habilitar</button>
+      </div>
+      <div class="admin-msg" id="adm-msg-phase"></div>
+    </div>
+
+    <div class="admin-section">
+      <h3>Configuración global</h3>
+      <div class="admin-row">
+        <button class="btn-toggle" id="adm-toggle-visible">👁 Preds visibles</button>
+        <button class="btn-toggle" id="adm-toggle-submit">📤 Envío abierto</button>
+      </div>
+      <div class="admin-msg" id="adm-msg-flags"></div>
+    </div>
+
+    <button class="btn-close-admin" id="adm-close">Cerrar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── CONFIG ────────────────────────────────────────────────────
+const SB_URL = 'https://hugleolrwojikdqidesk.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1Z2xlb2xyd29qaWtkcWlkZXNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MjI1MzUsImV4cCI6MjA5NzA5ODUzNX0.WAd2ghHrkWYoUwtjzAHQ1OQtzguNaU4ztT8VTTh3lrE';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// ── STATE ─────────────────────────────────────────────────────
+let me = null;
+let allMatches = [];
+let myPreds = {};       // matchId → {home, away, points, is_exact}
+let myBonus = {};
+let phaseSubmitted = new Set();
+let leaderboard = [];
+let allPlayers = [];
+let config = {};
+let rankSnaps = {};
+let currentView = 'pronosticos';
+let currentPhase = 'Grupos';
+let currentGroup = 'Todos';
+let selectedProfile = null;
+let pinDigits = [];
+let pendingPreds = {};  // matchId → {home, away} — cambios sin guardar
+let pendingBonus = {};
+
+// ── HELPERS ───────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmtDate = iso => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' }) +
+         ' ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+};
+const initials = name => name ? name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : '?';
+const avatarHTML = (url, name, size='40') =>
+  url
+    ? `<img src="${url}" alt="${name}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover">`
+    : `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#2d5c3a;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:${Math.floor(parseInt(size)*0.38)}px;font-weight:700;color:#4ade80">${initials(name)}</div>`;
+
+// ── AUTH ──────────────────────────────────────────────────────
+async function loadProfiles() {
+  const { data } = await sb.rpc('list_profiles');
+  const profiles = data || [];
+  const grid = $('profile-grid');
+  if (!profiles.length) { grid.innerHTML = '<div class="empty">No hay perfiles aún.</div>'; return; }
+  grid.innerHTML = profiles.map(p => `
+    <div class="profile-card" data-id="${p.id}" data-pin="${p.has_pin}">
+      <div class="profile-avatar">${p.avatar_url ? `<img src="${p.avatar_url}">` : initials(p.name)}</div>
+      <div class="profile-card-name">${p.name}</div>
+      <span class="profile-card-badge ${p.has_pin ? 'badge-pin' : 'badge-new'}">${p.has_pin ? '🔐 PIN' : '✨ Nuevo'}</span>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.profile-card').forEach(card => {
+    card.addEventListener('click', () => openPinModal({ id: parseInt(card.dataset.id), has_pin: card.dataset.pin === 'true', name: card.querySelector('.profile-card-name').textContent }));
+  });
+}
+
+function openPinModal(profile) {
+  selectedProfile = profile;
+  pinDigits = [];
+  updatePinDots();
+  $('pin-error').textContent = '';
+  $('pin-modal-title').textContent = profile.has_pin ? `Hola, ${profile.name.split(' ')[0]}` : `Bienvenido/a, ${profile.name.split(' ')[0]}`;
+  $('pin-modal-subtitle').textContent = profile.has_pin ? 'Ingresa tu PIN de 4 dígitos' : 'Crea tu PIN de 4 dígitos (anótalo)';
+  $('pin-modal').classList.remove('hidden');
+}
+
+function closePinModal() {
+  $('pin-modal').classList.add('hidden');
+  selectedProfile = null;
+  pinDigits = [];
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    $(`dot-${i}`).classList.toggle('filled', i < pinDigits.length);
+  }
+}
+
+async function handlePin() {
+  const pin = pinDigits.join('');
+  if (pin.length < 4) return;
+  const email    = `profile${selectedProfile.id}@nortverde.app`;
+  const password = `Pf26#${pin}`;
+  $('pin-error').textContent = '';
+  $('pin-keypad').style.opacity = '0.5';
+
+  if (!selectedProfile.has_pin) {
+    // Crear cuenta nueva
+    const { error: signUpErr } = await sb.auth.signUp({ email, password });
+    if (signUpErr && !signUpErr.message.includes('already registered')) {
+      showPinError('Error al crear cuenta. Intenta de nuevo.');
+      resetPin(); return;
+    }
+    // Auto-confirmar email
+    await sb.rpc('confirm_email', { p_email: email });
+    // Sign in
+    const { error: signInErr } = await sb.auth.signInWithPassword({ email, password });
+    if (signInErr) { showPinError('PIN incorrecto.'); resetPin(); return; }
+    // Vincular perfil existente
+    const { data: prof } = await sb.rpc('link_profile', { p_profile_id: selectedProfile.id });
+    if (prof?.error) { showPinError('Error al vincular perfil.'); resetPin(); return; }
+    me = prof;
+  } else {
+    // Login con PIN existente
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { showPinError('PIN incorrecto.'); resetPin(); return; }
+    const prof = await fetchMyProfile();
+    if (!prof) { showPinError('Error al cargar perfil.'); resetPin(); return; }
+    me = prof;
+  }
+
+  closePinModal();
+  await initApp();
+}
+
+function showPinError(msg) {
+  $('pin-error').textContent = msg;
+  $('pin-keypad').style.opacity = '1';
+}
+
+function resetPin() {
+  pinDigits = [];
+  updatePinDots();
+  $('pin-keypad').style.opacity = '1';
+}
+
+// ── APP INIT ──────────────────────────────────────────────────
+async function initApp() {
+  if (!me) return;
+  $('login-screen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('topbar-name').textContent = me.name.split(' ')[0];
+  if (me.avatar_url) {
+    $('topbar-avatar').innerHTML = `<img src="${me.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  } else {
+    $('topbar-avatar').textContent = initials(me.name);
+  }
+  if (me.is_admin) $('btn-admin').classList.remove('hidden');
+  await loadAllData();
+  renderView(currentView);
+}
+
+async function loadAllData() {
+  const [matchRes, predRes, subRes, configRes, lbRes, playerRes, snapRes, bonusRes] = await Promise.all([
+    sb.from('matches').select('*').order('match_number'),
+    sb.from('predictions').select('*').eq('participant_id', me.id),
+    sb.from('phase_submissions').select('phase').eq('participant_id', me.id),
+    sb.from('app_config').select('*'),
+    sb.from('leaderboard').select('*'),
+    sb.from('players').select('*, teams(name, flag)').order('goals', { ascending: false }),
+    sb.rpc('get_rank_snap'),
+    sb.from('bonus_predictions').select('*').eq('participant_id', me.id).maybeSingle(),
+  ]);
+  allMatches = matchRes.data || [];
+  myPreds = {};
+  (predRes.data || []).forEach(p => { myPreds[p.match_id] = p; });
+  phaseSubmitted = new Set((subRes.data || []).map(s => s.phase));
+  config = {};
+  (configRes.data || []).forEach(c => { config[c.key] = c.value; });
+  leaderboard = lbRes.data || [];
+  allPlayers = playerRes.data || [];
+  rankSnaps = snapRes.data || {};
+  myBonus = bonusRes.data || {};
+  pendingPreds = {};
+  pendingBonus = {};
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function navigate(view) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  $(`view-${view}`).classList.add('active');
+  document.querySelector(`[data-view="${view}"]`)?.classList.add('active');
+  renderView(view);
+}
+
+function renderView(view) {
+  if (view === 'pronosticos') renderPronosticos();
+  if (view === 'tabla')       renderTabla();
+  if (view === 'resultados')  renderResultados();
+  if (view === 'planteles')   renderPlanteles();
+}
+
+// ── PRONÓSTICOS ───────────────────────────────────────────────
+function renderPronosticos() {
+  const container = $('view-pronosticos');
+  const phases = [...new Set(allMatches.filter(m => m.enabled).map(m => m.phase))];
+  // Siempre mostrar Grupos
+  if (!phases.includes('Grupos')) phases.unshift('Grupos');
+
+  const tabs = phases.map(ph => `
+    <button class="phase-tab ${ph === currentPhase ? 'active' : ''}" data-phase="${ph}">
+      ${ph} ${phaseSubmitted.has(ph) ? '✓' : ''}
+    </button>
+  `).join('');
+
+  const matchesInPhase = allMatches.filter(m => m.phase === currentPhase);
+  const isSubmitted    = phaseSubmitted.has(currentPhase);
+  const submissionsOpen = config.submissions_open === 'true';
+  const now = new Date();
+
+  let bonusHTML = '';
+  if (currentPhase === 'Grupos') {
+    const deadlinePassed = matchesInPhase.length > 0 && matchesInPhase[0].deadline_at && new Date(matchesInPhase[0].deadline_at) < now;
+    const disabled = deadlinePassed || isSubmitted ? 'disabled' : '';
+    bonusHTML = `
+      <div class="bonus-block">
+        <div class="bonus-title">⭐ Predicciones especiales</div>
+        <div class="bonus-row">
+          <div class="bonus-label">Goleador del torneo (+5 pts)</div>
+          <input class="bonus-input" id="bonus-scorer" ${disabled} placeholder="Nombre del jugador" value="${myBonus.top_scorer_name || pendingBonus.top || ''}">
+        </div>
+        <div class="bonus-row">
+          <div class="bonus-label">MVP / Balón de Oro (+5 pts)</div>
+          <input class="bonus-input" id="bonus-mvp" ${disabled} placeholder="Nombre del jugador" value="${myBonus.mvp_name || pendingBonus.mvp || ''}">
+        </div>
+        <div class="bonus-grid">
+          <div class="bonus-row">
+            <div class="bonus-label">Finalista 1 (+2/+6 pts)</div>
+            <input class="bonus-input" id="bonus-f1" ${disabled} placeholder="País" value="${myBonus.finalist1_name || pendingBonus.f1 || ''}">
+          </div>
+          <div class="bonus-row">
+            <div class="bonus-label">Finalista 2 (+2/+6 pts)</div>
+            <input class="bonus-input" id="bonus-f2" ${disabled} placeholder="País" value="${myBonus.finalist2_name || pendingBonus.f2 || ''}">
+          </div>
+        </div>
+        ${deadlinePassed ? '<p style="font-size:0.75rem;color:var(--gray-400);margin-top:8px">Plazo de extras cerrado.</p>' : ''}
+      </div>`;
+  }
+
+  const ticketsHTML = matchesInPhase.map(m => matchTicket(m, isSubmitted)).join('');
+
+  const actionsHTML = !isSubmitted ? `
+    <div class="actions-bar">
+      <button class="btn-draft" id="btn-draft">Guardar borrador</button>
+      ${submissionsOpen || (me && me.can_submit) ? `<button class="btn-submit" id="btn-submit">Enviar definitivo ✓</button>` : ''}
+    </div>` : '';
+
+  container.innerHTML = `
+    <div class="phase-tabs">${tabs}</div>
+    ${isSubmitted ? '<div class="submitted-banner">✓ Fase enviada — predicciones bloqueadas</div>' : ''}
+    ${bonusHTML}
+    ${ticketsHTML}
+    ${actionsHTML}
+  `;
+
+  container.querySelectorAll('.phase-tab').forEach(t => {
+    t.addEventListener('click', () => { currentPhase = t.dataset.phase; renderPronosticos(); });
+  });
+
+  if (!isSubmitted) {
+    container.querySelectorAll('.score-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mid = parseInt(btn.dataset.mid);
+        const side = btn.dataset.side;
+        const delta = btn.dataset.delta === '+' ? 1 : -1;
+        const current = pendingPreds[mid] || { home: myPreds[mid]?.home_goals ?? 0, away: myPreds[mid]?.away_goals ?? 0 };
+        if (side === 'home') current.home = Math.max(0, Math.min(20, current.home + delta));
+        else current.away = Math.max(0, Math.min(20, current.away + delta));
+        pendingPreds[mid] = current;
+        const input = container.querySelector(`input[data-mid="${mid}"][data-side="${side}"]`);
+        if (input) input.value = side === 'home' ? current.home : current.away;
+        input?.closest('.match-ticket')?.classList.add('has-pred');
+      });
+    });
+
+    container.querySelectorAll('.score-val:not(.readonly)').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const mid = parseInt(inp.dataset.mid);
+        const side = inp.dataset.side;
+        const val = Math.max(0, Math.min(20, parseInt(inp.value) || 0));
+        inp.value = val;
+        const current = pendingPreds[mid] || { home: myPreds[mid]?.home_goals ?? 0, away: myPreds[mid]?.away_goals ?? 0 };
+        if (side === 'home') current.home = val; else current.away = val;
+        pendingPreds[mid] = current;
+        inp.closest('.match-ticket')?.classList.add('has-pred');
+      });
+    });
+
+    $('btn-draft')?.addEventListener('click', () => savePreds(false));
+    $('btn-submit')?.addEventListener('click', () => {
+      if (confirm('¿Enviar predicciones definitivas? Esta acción no se puede deshacer.')) savePreds(true);
+    });
+  }
+}
+
+function matchTicket(m, isSubmitted) {
+  const now = new Date();
+  const deadlinePassed = m.deadline_at && new Date(m.deadline_at) < now;
+  const locked = isSubmitted || deadlinePassed;
+  const pred = pendingPreds[m.id] || (myPreds[m.id] ? { home: myPreds[m.id].home_goals, away: myPreds[m.id].away_goals } : null);
+  const hasPred = !!pred;
+  const pts = myPreds[m.id]?.points;
+  const isExact = myPreds[m.id]?.is_exact;
+  const matchDone = m.status === 'FINALIZADO';
+
+  let statusTag = '';
+  if (m.status === 'EN_JUEGO') statusTag = `<span class="ticket-status status-live">🔴 En vivo ${m.live_clock ? m.live_clock+"'" : ''}</span>`;
+  else if (matchDone) statusTag = `<span class="ticket-status status-done">✓ Finalizado</span>`;
+  else statusTag = `<span class="ticket-status status-upcoming">⏳ ${fmtDate(m.kickoff_at)}</span>`;
+
+  const homeScore = matchDone ? m.home_goals : (pred?.home ?? 0);
+  const awayScore = matchDone ? m.away_goals : (pred?.away ?? 0);
+  const ro = locked || matchDone ? 'readonly' : '';
+
+  const homeInput = ro
+    ? `<input type="number" class="score-val readonly" value="${homeScore}" readonly>`
+    : `<div class="score-input-group">
+         <button class="score-btn" data-mid="${m.id}" data-side="home" data-delta="+">▲</button>
+         <input type="number" class="score-val" data-mid="${m.id}" data-side="home" value="${homeScore}" min="0" max="20">
+         <button class="score-btn" data-mid="${m.id}" data-side="home" data-delta="-">▼</button>
+       </div>`;
+
+  const awayInput = ro
+    ? `<input type="number" class="score-val readonly" value="${awayScore}" readonly>`
+    : `<div class="score-input-group">
+         <button class="score-btn" data-mid="${m.id}" data-side="away" data-delta="+">▲</button>
+         <input type="number" class="score-val" data-mid="${m.id}" data-side="away" value="${awayScore}" min="0" max="20">
+         <button class="score-btn" data-mid="${m.id}" data-side="away" data-delta="-">▼</button>
+       </div>`;
+
+  let ptsTag = '';
+  if (matchDone && hasPred) {
+    if (isExact) ptsTag = `<span class="ticket-pts pts-exact">✓ Exacto +${pts}</span>`;
+    else if (pts > 0) ptsTag = `<span class="ticket-pts pts-winner">↗ Ganador +${pts}</span>`;
+    else ptsTag = `<span class="ticket-pts pts-fail">✗ Falló</span>`;
+  } else if (matchDone && !hasPred) {
+    ptsTag = `<span class="ticket-pts pts-none">Sin predicción</span>`;
+  }
+
+  return `
+    <div class="match-ticket ${hasPred && !matchDone ? 'has-pred' : ''} ${locked ? 'locked' : ''}">
+      <div class="ticket-header">
+        <span class="ticket-header-left">Grupo ${m.group_name || ''} · P${m.match_number}</span>
+        ${statusTag}
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-team">
+          <span class="flag">${flagFor(m.home_team)}</span>
+          <span>${m.home_team}</span>
+        </div>
+        <div class="ticket-score">
+          ${homeInput}
+          <span class="score-sep">—</span>
+          ${awayInput}
+        </div>
+        <div class="ticket-team">
+          <span class="flag">${flagFor(m.away_team)}</span>
+          <span>${m.away_team}</span>
+        </div>
+      </div>
+      <div class="ticket-footer">
+        <span class="ticket-stadium">📍 ${(m.stadium || '').split(',')[0]}</span>
+        ${ptsTag}
+      </div>
+    </div>`;
+}
+
+async function savePreds(isFinal) {
+  const items = Object.entries(pendingPreds).map(([match_id, v]) => ({
+    match_id: parseInt(match_id), home_goals: v.home, away_goals: v.away
+  }));
+
+  // Bonus
+  const scorer = $('bonus-scorer')?.value?.trim();
+  const mvp    = $('bonus-mvp')?.value?.trim();
+  const f1     = $('bonus-f1')?.value?.trim();
+  const f2     = $('bonus-f2')?.value?.trim();
+  if (scorer || mvp || f1 || f2) {
+    await sb.rpc('save_bonus', { p_top: scorer||'', p_mvp: mvp||'', p_f1: f1||'', p_f2: f2||'' });
+  }
+
+  if (!items.length && !isFinal) { alert('No hay cambios para guardar.'); return; }
+
+  const { data, error } = await sb.rpc('save_predictions', {
+    p_phase: currentPhase,
+    p_items: items,
+    p_final: isFinal
+  });
+
+  if (error) { alert('Error al guardar: ' + error.message); return; }
+  if (data === 'FASE_BLOQUEADA') { alert('Esta fase ya fue enviada.'); return; }
+
+  // Recargar datos
+  const [predRes, subRes, bonusRes] = await Promise.all([
+    sb.from('predictions').select('*').eq('participant_id', me.id),
+    sb.from('phase_submissions').select('phase').eq('participant_id', me.id),
+    sb.from('bonus_predictions').select('*').eq('participant_id', me.id).maybeSingle(),
+  ]);
+  myPreds = {};
+  (predRes.data || []).forEach(p => { myPreds[p.match_id] = p; });
+  phaseSubmitted = new Set((subRes.data || []).map(s => s.phase));
+  myBonus = bonusRes.data || {};
+  pendingPreds = {};
+
+  renderPronosticos();
+  if (isFinal) alert('¡Predicciones enviadas! Quedan bloqueadas.');
+  else alert('Borrador guardado.');
+}
+
+// ── TABLA ─────────────────────────────────────────────────────
+function renderTabla() {
+  const container = $('view-tabla');
+  if (!leaderboard.length) { container.innerHTML = '<div class="empty">Sin datos aún.</div>'; return; }
+
+  const top3 = leaderboard.slice(0, 3);
+  const rest = leaderboard.slice(3);
+  let pos = 1; let posMap = {};
+  leaderboard.forEach((p, i) => {
+    if (i > 0 && p.pts_total === leaderboard[i-1].pts_total && p.exact_count === leaderboard[i-1].exact_count)
+      posMap[p.id] = posMap[leaderboard[i-1].id];
+    else posMap[p.id] = pos;
+    pos++;
+  });
+
+  const podiumHTML = top3.map(p => {
+    const bg = ['#fffbeb','#f8fafc','#fef3c7'][top3.indexOf(p)] || '#f8fafc';
+    return `
+      <div class="podium-slot">
+        <div class="podium-avatar" style="background:${bg}">${avatarHTML(p.avatar_url, p.name, '52')}</div>
+        <div class="podium-name">${p.name.split(' ')[0]}</div>
+        <div class="podium-pts">${p.pts_total} pts</div>
+        <div class="podium-block">${posMap[p.id]}°</div>
+      </div>`;
+  }).join('');
+
+  const rankHTML = (p) => {
+    const prev = rankSnaps[String(p.id)];
+    if (!prev) return '<span class="lb-arrow">—</span>';
+    const cur = posMap[p.id];
+    if (cur < prev) return `<span class="lb-arrow arrow-up">▲</span>`;
+    if (cur > prev) return `<span class="lb-arrow arrow-down">▼</span>`;
+    return '<span class="lb-arrow">—</span>';
+  };
+
+  const tableRows = leaderboard.map(p => `
+    <tr class="${p.id === me?.id ? 'me' : ''}">
+      <td class="lb-pos">${posMap[p.id]}°</td>
+      <td class="lb-name">
+        ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:22px;height:22px;border-radius:50%;object-fit:cover">` : ''}
+        ${p.name}
+        ${p.id === me?.id ? '<span class="lb-you">tú</span>' : ''}
+        ${rankHTML(p)}
+      </td>
+      <td class="lb-num">${p.pts_grupos}</td>
+      <td class="lb-num">${p.pts_eliminatorias}</td>
+      <td class="lb-num">${p.pts_bonus}</td>
+      <td class="lb-num">${p.exact_count}</td>
+      <td class="lb-total">${p.pts_total}</td>
+    </tr>`).join('');
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="card-header"><h2>🏆 Tabla de posiciones</h2></div>
+      <div class="card-body">
+        <div class="podium">${podiumHTML}</div>
+        <table class="leaderboard-table">
+          <thead><tr>
+            <th>Pos</th><th>Jugador</th>
+            <th style="text-align:right">Gru</th>
+            <th style="text-align:right">Eli</th>
+            <th style="text-align:right">Bon</th>
+            <th style="text-align:right">✓</th>
+            <th style="text-align:right">Total</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── RESULTADOS ────────────────────────────────────────────────
+function renderResultados() {
+  const container = $('view-resultados');
+  const groups = ['Todos', 'A','B','C','D','E','F','G','H','I','J','K','L',
+    '16avos','8vos','4tos','Semis','3er lugar','Final'];
+
+  const tabsHTML = groups.filter(g => {
+    if (g === 'Todos') return true;
+    if (['A','B','C','D','E','F','G','H','I','J','K','L'].includes(g))
+      return allMatches.some(m => m.group_name === g);
+    return allMatches.some(m => m.phase === g && m.enabled);
+  }).map(g => `<button class="group-tab ${g === currentGroup ? 'active' : ''}" data-g="${g}">${g}</button>`).join('');
+
+  let matches;
+  if (currentGroup === 'Todos') {
+    matches = allMatches.filter(m => m.enabled);
+  } else if (['A','B','C','D','E','F','G','H','I','J','K','L'].includes(currentGroup)) {
+    matches = allMatches.filter(m => m.group_name === currentGroup);
+  } else {
+    matches = allMatches.filter(m => m.phase === currentGroup);
+  }
+
+  const cardsHTML = matches.map(m => {
+    const pred = myPreds[m.id];
+    const done = m.status === 'FINALIZADO';
+    const live = m.status === 'EN_JUEGO';
+
+    let ptsTag = '';
+    if (done && pred) {
+      if (pred.is_exact) ptsTag = `<span class="ticket-pts pts-exact">✓ Exacto +${pred.points}</span>`;
+      else if (pred.points > 0) ptsTag = `<span class="ticket-pts pts-winner">↗ +${pred.points}</span>`;
+      else ptsTag = `<span class="ticket-pts pts-fail">✗ 0 pts</span>`;
+    }
+
+    const score = done || live
+      ? `<div class="result-score">${m.home_goals} — ${m.away_goals}</div>`
+      : `<div class="result-score upcoming">${fmtDate(m.kickoff_at)}</div>`;
+
+    const predInfo = pred
+      ? `<span>Mi pronóstico: ${pred.home_goals}–${pred.away_goals}</span>${ptsTag}`
+      : `<span style="color:var(--gray-400)">Sin pronóstico</span>`;
+
+    return `
+      <div class="result-card">
+        <div class="result-header">
+          <span>P${m.match_number} · ${m.phase}${m.group_name ? ' '+m.group_name : ''}</span>
+          ${live ? '<span style="color:var(--red);font-weight:700">🔴 En vivo</span>' : done ? '<span style="color:#16a34a">✓</span>' : ''}
+        </div>
+        <div class="result-body">
+          <div class="result-team">
+            <span class="flag">${flagFor(m.home_team)}</span>
+            <span>${m.home_team}</span>
+          </div>
+          ${score}
+          <div class="result-team">
+            <span class="flag">${flagFor(m.away_team)}</span>
+            <span>${m.away_team}</span>
+          </div>
+        </div>
+        ${done || pred ? `<div class="result-mypred">${predInfo}</div>` : ''}
+        ${done && (m.home_scorers || m.away_scorers) ? `
+          <div class="result-scorers">⚽ ${[m.home_scorers, m.away_scorers].filter(Boolean).join(' · ')}</div>` : ''}
+      </div>`;
+  }).join('') || '<div class="empty">No hay partidos en esta sección.</div>';
+
+  container.innerHTML = `
+    <div class="group-tabs">${tabsHTML}</div>
+    ${cardsHTML}`;
+
+  container.querySelectorAll('.group-tab').forEach(t => {
+    t.addEventListener('click', () => { currentGroup = t.dataset.g; renderResultados(); });
+  });
+}
+
+// ── PLANTELES ─────────────────────────────────────────────────
+function renderPlanteles() {
+  if (allPlayers.length === 0) {
+    $('squad-list').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    return;
+  }
+  renderSquadList($('squad-search').value || '');
+}
+
+function renderSquadList(filter) {
+  const byTeam = {};
+  allPlayers.forEach(p => {
+    const teamName = p.teams?.name || 'Desconocido';
+    if (!byTeam[teamName]) byTeam[teamName] = [];
+    const name = p.name || '';
+    if (!filter || name.toLowerCase().includes(filter.toLowerCase()) || teamName.toLowerCase().includes(filter.toLowerCase())) {
+      byTeam[teamName].push(p);
+    }
+  });
+
+  const html = Object.entries(byTeam)
+    .filter(([, pl]) => pl.length > 0)
+    .sort(([a], [b]) => a.localeCompare(b, 'es'))
+    .map(([team, players]) => {
+      const flag = players[0]?.teams?.flag || '';
+      const rows = players.map(p => `
+        <tr>
+          <td>${p.number || ''}</td>
+          <td><span class="pos-badge pos-${p.position}">${p.position||'?'}</span></td>
+          <td>${p.name}${p.goals > 0 ? ` <span style="color:var(--accent-dk)">⚽${p.goals}</span>` : ''}</td>
+        </tr>`).join('');
+      return `
+        <details>
+          <summary>${flag} ${team} <span style="color:var(--gray-400);font-size:0.75rem;font-weight:400">${players.length} jug.</span></summary>
+          <table class="squad-table"><tbody>${rows}</tbody></table>
+        </details>`;
+    }).join('');
+
+  $('squad-list').innerHTML = html || '<div class="empty">Sin resultados.</div>';
+}
+
+// ── FLAGS LOOKUP ──────────────────────────────────────────────
+const FLAGS = {
+  'México':'🇲🇽','Sudáfrica':'🇿🇦','Rep. Corea':'🇰🇷','Chequia':'🇨🇿',
+  'Canadá':'🇨🇦','Bosnia y Herz.':'🇧🇦','Catar':'🇶🇦','Suiza':'🇨🇭',
+  'Brasil':'🇧🇷','Marruecos':'🇲🇦','Haití':'🇭🇹','Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'EE.UU.':'🇺🇸','Paraguay':'🇵🇾','Australia':'🇦🇺','Turquía':'🇹🇷',
+  'Alemania':'🇩🇪','Curazao':'🇨🇼','Costa de Marfil':'🇨🇮','Ecuador':'🇪🇨',
+  'Países Bajos':'🇳🇱','Japón':'🇯🇵','Suecia':'🇸🇪','Túnez':'🇹🇳',
+  'Bélgica':'🇧🇪','Egipto':'🇪🇬','RI de Irán':'🇮🇷','Nueva Zelanda':'🇳🇿',
+  'España':'🇪🇸','Islas de Cabo Verde':'🇨🇻','Arabia Saudí':'🇸🇦','Uruguay':'🇺🇾',
+  'Francia':'🇫🇷','Senegal':'🇸🇳','Irak':'🇮🇶','Noruega':'🇳🇴',
+  'Argentina':'🇦🇷','Argelia':'🇩🇿','Austria':'🇦🇹','Jordania':'🇯🇴',
+  'Portugal':'🇵🇹','RD Congo':'🇨🇩','Uzbekistán':'🇺🇿','Colombia':'🇨🇴',
+  'Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Croacia':'🇭🇷','Ghana':'🇬🇭','Panamá':'🇵🇦',
+};
+const flagFor = name => FLAGS[name] || '🏳️';
+
+// ── ADMIN ─────────────────────────────────────────────────────
+function updateAdminToggles() {
+  const vBtn = $('adm-toggle-visible');
+  const sBtn = $('adm-toggle-submit');
+  const visible = config.predictions_visible === 'true';
+  const open    = config.submissions_open === 'true';
+  vBtn.className = `btn-toggle ${visible ? 'on' : 'off'}`;
+  vBtn.textContent = `👁 Preds ${visible ? 'Visibles' : 'Ocultas'}`;
+  sBtn.className = `btn-toggle ${open ? 'on' : 'off'}`;
+  sBtn.textContent = `📤 Envío ${open ? 'Abierto' : 'Cerrado'}`;
+}
+
+async function handleSetResult() {
+  const num    = parseInt($('adm-match').value);
+  const home   = parseInt($('adm-home').value);
+  const away   = parseInt($('adm-away').value);
+  const scH    = $('adm-scorers-h').value.trim();
+  const scA    = $('adm-scorers-a').value.trim();
+  if (isNaN(num) || isNaN(home) || isNaN(away)) { $('adm-msg-result').textContent = 'Completa todos los campos.'; return; }
+  const match = allMatches.find(m => m.match_number === num);
+  if (!match) { $('adm-msg-result').textContent = 'Partido no encontrado.'; return; }
+  $('adm-msg-result').textContent = 'Guardando...';
+  const { data, error } = await sb.rpc('set_result', { p_match_id: match.id, p_home: home, p_away: away, p_home_scorers: scH, p_away_scorers: scA });
+  if (error) { $('adm-msg-result').textContent = 'Error: ' + error.message; return; }
+  $('adm-msg-result').textContent = data === 'OK' ? '✓ Guardado. Recargando datos...' : data;
+  if (data === 'OK') { await loadAllData(); renderView(currentView); }
+}
+
+async function handleEnablePhase() {
+  const phase = $('adm-phase').value;
+  $('adm-msg-phase').textContent = 'Habilitando...';
+  const { data, error } = await sb.rpc('enable_phase', { p_phase: phase });
+  if (error) { $('adm-msg-phase').textContent = 'Error: ' + error.message; return; }
+  $('adm-msg-phase').textContent = data === 'OK' ? `✓ Fase ${phase} habilitada.` : data;
+  if (data === 'OK') { await loadAllData(); renderView(currentView); }
+}
+
+async function handleToggleFlags(key) {
+  const current = config[key] === 'true';
+  const newVal  = !current;
+  const vis  = key === 'predictions_visible' ? newVal : config.predictions_visible === 'true';
+  const open = key === 'submissions_open'    ? newVal : config.submissions_open === 'true';
+  $('adm-msg-flags').textContent = 'Guardando...';
+  const { data, error } = await sb.rpc('set_flags', { p_predictions_visible: vis, p_submissions_open: open });
+  if (error) { $('adm-msg-flags').textContent = 'Error: ' + error.message; return; }
+  config[key] = String(newVal);
+  $('adm-msg-flags').textContent = '✓ Actualizado';
+  updateAdminToggles();
+}
+
+// ── EVENTS ────────────────────────────────────────────────────
+function setupEvents() {
+  // PIN keypad
+  document.querySelectorAll('.pin-key[data-d]').forEach(k => {
+    k.addEventListener('click', () => {
+      if (pinDigits.length >= 4) return;
+      pinDigits.push(k.dataset.d);
+      updatePinDots();
+      if (pinDigits.length === 4) setTimeout(handlePin, 200);
+    });
+  });
+  $('pin-del').addEventListener('click', () => { pinDigits.pop(); updatePinDots(); $('pin-error').textContent = ''; });
+  $('pin-cancel').addEventListener('click', closePinModal);
+
+  // Navigation
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.addEventListener('click', () => navigate(n.dataset.view));
+  });
+
+  // Logout
+  $('btn-logout').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    me = null; allMatches = []; myPreds = {}; leaderboard = [];
+    $('app').classList.add('hidden');
+    $('login-screen').classList.remove('hidden');
+    loadProfiles();
+  });
+
+  // Admin
+  $('btn-admin').addEventListener('click', () => {
+    updateAdminToggles();
+    $('admin-modal').classList.remove('hidden');
+  });
+  $('adm-close').addEventListener('click', () => $('admin-modal').classList.add('hidden'));
+  $('adm-btn-result').addEventListener('click', handleSetResult);
+  $('adm-btn-phase').addEventListener('click', handleEnablePhase);
+  $('adm-toggle-visible').addEventListener('click', () => handleToggleFlags('predictions_visible'));
+  $('adm-toggle-submit').addEventListener('click', () => handleToggleFlags('submissions_open'));
+
+  // Squad search
+  $('squad-search').addEventListener('input', e => renderSquadList(e.target.value));
+}
+
+// ── BOOT ──────────────────────────────────────────────────────
+async function fetchMyProfile() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return null;
+  const { data } = await sb.from('profiles')
+    .select('*')
+    .eq('auth_user_id', session.user.id)
+    .single();
+  return data || null;
+}
+
+async function boot() {
+  setupEvents();
+
+  // Verificar sesión activa
+  const prof = await fetchMyProfile();
+  if (prof) {
+    me = prof;
+    await initApp();
+    return;
+  }
+
+  // Mostrar login
+  loadProfiles();
+}
+
+boot();
+</script>
+</body>
+</html>
