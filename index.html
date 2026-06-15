@@ -882,48 +882,32 @@ async function handlePin() {
   $('pin-error').textContent = '';
   $('pin-keypad').style.opacity = '0.5';
 
-  if (!selectedProfile.has_pin) {
-    // Intentar login primero (por si ya registró PIN pero has_pin no se actualizó)
-    const { error: signInFirst } = await sb.auth.signInWithPassword({ email, password });
-    if (!signInFirst) {
-      const prof = await fetchMyProfile();
-      if (prof) { me = prof; closePinModal(); await initApp(); return; }
+  try {
+    if (selectedProfile.has_pin) {
+      // Usuario existente: solo sign in. boot() se dispara via onAuthStateChange.
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) showPinError('PIN incorrecto.');
+      return;
     }
 
-    // Cuenta nueva — registrar
-    const { error: signUpErr } = await sb.auth.signUp({ email, password });
-    if (signUpErr) {
-      const msg = signUpErr.message || '';
-      if (msg.includes('seconds') || msg.includes('rate')) {
-        showPinError('Espera 60 segundos y vuelve a intentarlo.');
-      } else if (msg.includes('already registered') || msg.includes('already in use')) {
-        // Usuario ya existe pero signIn falló → PIN equivocado
-        showPinError('PIN incorrecto. Si ya elegiste PIN antes, úsalo.');
-      } else {
-        showPinError('Error: ' + msg);
-      }
-      resetPin(); return;
+    // Usuario nuevo: signUp con profile_id en metadata, confirm email, sign in.
+    const { data: su, error: e1 } = await sb.auth.signUp({
+      email, password,
+      options: { data: { profile_id: selectedProfile.id } }
+    });
+    if (e1 && !/already|registered|exists/i.test(e1.message || '')) {
+      showPinError(e1.message || 'Error al crear cuenta.');
+      return;
     }
-    // Auto-confirmar email
-    await sb.rpc('confirm_email', { p_email: email });
-    // Sign in
-    const { error: signInErr } = await sb.auth.signInWithPassword({ email, password });
-    if (signInErr) { showPinError('Error al iniciar sesión: ' + signInErr.message); resetPin(); return; }
-    // Vincular perfil existente
-    const { data: prof } = await sb.rpc('link_profile', { p_profile_id: selectedProfile.id });
-    if (prof?.error) { showPinError('Error al vincular perfil: ' + prof.error); resetPin(); return; }
-    me = prof;
-  } else {
-    // Login con PIN existente
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) { showPinError('PIN incorrecto.'); resetPin(); return; }
-    const prof = await fetchMyProfile();
-    if (!prof) { showPinError('Error al cargar perfil.'); resetPin(); return; }
-    me = prof;
+    if (!(su && su.session)) {
+      try { await sb.rpc('confirm_email', { p_email: email }); } catch(_) {}
+      const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
+      if (e2) { showPinError('No se pudo crear la clave. Intenta de nuevo.'); return; }
+    }
+    // onAuthStateChange → boot() → register_profile() vincula el perfil.
+  } finally {
+    $('pin-keypad').style.opacity = '1';
   }
-
-  closePinModal();
-  await initApp();
 }
 
 function showPinError(msg) {
@@ -1487,10 +1471,7 @@ function setupEvents() {
   // Logout
   $('btn-logout').addEventListener('click', async () => {
     await sb.auth.signOut();
-    me = null; allMatches = []; myPreds = {}; leaderboard = [];
-    $('app').classList.add('hidden');
-    $('login-screen').classList.remove('hidden');
-    loadProfiles();
+    location.reload();
   });
 
   // Admin
@@ -1509,32 +1490,30 @@ function setupEvents() {
 }
 
 // ── BOOT ──────────────────────────────────────────────────────
-async function fetchMyProfile() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return null;
-  const { data } = await sb.from('profiles')
-    .select('*')
-    .eq('auth_user_id', session.user.id)
-    .single();
-  return data || null;
-}
+let booted = false;
+
+sb.auth.onAuthStateChange((_e, session) => { if (session) boot(); });
+
+(async () => {
+  setupEvents();
+  const { data } = await sb.auth.getSession();
+  if (data.session) boot();
+  else loadProfiles();
+})();
 
 async function boot() {
-  setupEvents();
-
-  // Verificar sesión activa
-  const prof = await fetchMyProfile();
-  if (prof) {
-    me = prof;
-    await initApp();
+  if (booted) return;
+  booted = true;
+  const { data: prof, error } = await sb.rpc('register_profile');
+  if (error || !prof || prof.error) {
+    booted = false;
+    showToast('Error al iniciar sesión: ' + (error?.message || prof?.error || ''), 'error');
     return;
   }
-
-  // Mostrar login
-  loadProfiles();
+  me = prof;
+  closePinModal();
+  await initApp();
 }
-
-boot();
 </script>
 </body>
 </html>
