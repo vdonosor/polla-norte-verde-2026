@@ -14,7 +14,8 @@ exports.handler = async (event) => {
 
     const email    = `profile${profileId}@nortverde.app`;
     const password = `Pf26#${pin}`;
-    const url      = `${process.env.SUPABASE_URL}/auth/v1/admin/users`;
+    const SB_URL   = process.env.SUPABASE_URL || 'https://hugleolrwojikdqidesk.supabase.co';
+    const url      = `${SB_URL}/auth/v1/admin/users`;
 
     const res = await fetch(url, {
       method: 'POST',
