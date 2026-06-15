@@ -883,20 +883,35 @@ async function handlePin() {
   $('pin-keypad').style.opacity = '0.5';
 
   if (!selectedProfile.has_pin) {
-    // Crear cuenta nueva
+    // Intentar login primero (por si ya registró PIN pero has_pin no se actualizó)
+    const { error: signInFirst } = await sb.auth.signInWithPassword({ email, password });
+    if (!signInFirst) {
+      const prof = await fetchMyProfile();
+      if (prof) { me = prof; closePinModal(); await initApp(); return; }
+    }
+
+    // Cuenta nueva — registrar
     const { error: signUpErr } = await sb.auth.signUp({ email, password });
-    if (signUpErr && !signUpErr.message.includes('already registered')) {
-      showPinError('Error al crear cuenta. Intenta de nuevo.');
+    if (signUpErr) {
+      const msg = signUpErr.message || '';
+      if (msg.includes('seconds') || msg.includes('rate')) {
+        showPinError('Espera 60 segundos y vuelve a intentarlo.');
+      } else if (msg.includes('already registered') || msg.includes('already in use')) {
+        // Usuario ya existe pero signIn falló → PIN equivocado
+        showPinError('PIN incorrecto. Si ya elegiste PIN antes, úsalo.');
+      } else {
+        showPinError('Error: ' + msg);
+      }
       resetPin(); return;
     }
     // Auto-confirmar email
     await sb.rpc('confirm_email', { p_email: email });
     // Sign in
     const { error: signInErr } = await sb.auth.signInWithPassword({ email, password });
-    if (signInErr) { showPinError('PIN incorrecto.'); resetPin(); return; }
+    if (signInErr) { showPinError('Error al iniciar sesión: ' + signInErr.message); resetPin(); return; }
     // Vincular perfil existente
     const { data: prof } = await sb.rpc('link_profile', { p_profile_id: selectedProfile.id });
-    if (prof?.error) { showPinError('Error al vincular perfil.'); resetPin(); return; }
+    if (prof?.error) { showPinError('Error al vincular perfil: ' + prof.error); resetPin(); return; }
     me = prof;
   } else {
     // Login con PIN existente
