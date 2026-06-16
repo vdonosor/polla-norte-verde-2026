@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
   }
 
   const SB_URL = Deno.env.get('SUPABASE_URL') ?? 'https://hugleolrwojikdqidesk.supabase.co';
-  const SB_KEY = Deno.env.get('SUPABASE_SERVICE_KEY');
+  const SB_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!SB_KEY) {
     return new Response(JSON.stringify({ error: 'Missing SUPABASE_SERVICE_KEY' }), {

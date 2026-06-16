@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const email = `profile${profileId}@nortverde.app`;
     const password = `Pf26#${pin}`;
     const SB_URL = Deno.env.get('SUPABASE_URL') ?? 'https://hugleolrwojikdqidesk.supabase.co';
-    const SB_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_KEY')!;
+    const SB_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     const res = await fetch(`${SB_URL}/auth/v1/admin/users`, {
       method: 'POST',
