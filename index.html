@@ -1078,7 +1078,7 @@ function renderTabla() {
   const rows = displayLB.map(p => {
     const pos3 = displayPosMap[p.id], prz = prizes[pos3] || null;
     const liveTag = hasLive && p.live_bonus > 0
-      ? `<span style="font-size:.58rem;background:#fef9c3;color:#854d0e;padding:1px 5px;border-radius:5px;font-weight:700;margin-left:2px">+${p.live_bonus} 🔴</span>`
+      ? `<span style="font-size:.58rem;background:#fef9c3;color:#854d0e;padding:1px 5px;border-radius:5px;font-weight:700;margin-left:2px">+${p.live_bonus}</span>`
       : '';
     return `<tr class="${p.id === me?.id ? 'me' : ''}" style="cursor:pointer" data-pid="${p.id}">
       <td class="lb-pos">${pos3}°</td>
@@ -1095,6 +1095,7 @@ function renderTabla() {
 
   container.innerHTML = `
     <div class="view-header"><div class="view-header-label">Clasificación</div><div class="view-header-title">TABLA GENERAL</div></div>
+    ${hasLive ? `<div class="sec-divider" style="margin-bottom:12px"><div class="live-dot"></div><span class="sec-divider-label sec-live">En vivo</span><div class="sec-divider-line"></div></div>` : ''}
     ${prizeBar}
     <div class="podium">${podiumHTML}</div>
     <div class="lb-wrap"><table class="leaderboard-table">
