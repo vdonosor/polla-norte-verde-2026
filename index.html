@@ -1446,7 +1446,7 @@ async function handleESPNUpdate() {
     const data = await res.json();
     if (data.ok) {
       $('adm-msg-espn').textContent = `✓ ${data.updated} partidos actualizados (${data.espn_events} eventos ESPN)`;
-      if (data.updated > 0) { await loadAllData(); setupLiveRefresh(); renderView(currentView); }
+      await loadAllData(); setupLiveRefresh(); renderView(currentView);
     } else {
       $('adm-msg-espn').textContent = 'Error: ' + (data.error || 'desconocido');
     }

@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
   try {
     const matchRes = await fetch(
-      `${SB_URL}/rest/v1/matches?enabled=eq.true&select=id,home_team,away_team,status&order=match_number`,
+      `${SB_URL}/rest/v1/matches?enabled=eq.true&select=id,home_team,away_team,status,home_scorers,away_scorers&order=match_number`,
       { headers: sbHeaders }
     );
     const supaMatches = await matchRes.json();
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       const isLive = espnStatus === 'STATUS_IN_PROGRESS' || espnStatus === 'STATUS_HALFTIME';
       const clock = espnEvent.status?.displayClock || null;
 
-      if (isFinal && supaMatch.status !== 'FINALIZADO') {
+      if (isFinal) {
         let homeScorers = '';
         let awayScorers = '';
         try {
@@ -115,6 +115,11 @@ Deno.serve(async (req) => {
           homeScorers = hGoals.map((d: any) => d.athletesInvolved?.[0]?.displayName || '').filter(Boolean).join(', ');
           awayScorers = aGoals.map((d: any) => d.athletesInvolved?.[0]?.displayName || '').filter(Boolean).join(', ');
         } catch (_) { /* ignore scorer extraction errors */ }
+
+        const alreadyFinal = supaMatch.status === 'FINALIZADO';
+        const missingScorers = !supaMatch.home_scorers && !supaMatch.away_scorers && (homeScorers || awayScorers);
+
+        if (alreadyFinal && !missingScorers) continue;
 
         const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/set_result`, {
           method: 'POST',
@@ -145,6 +150,11 @@ Deno.serve(async (req) => {
         updated++;
       }
     }
+
+    // Siempre refrescar goles de jugadores al final del scan
+    await fetch(`${SB_URL}/rest/v1/rpc/refresh_player_goals`, {
+      method: 'POST', headers: sbHeaders, body: JSON.stringify({}),
+    });
 
     return new Response(
       JSON.stringify({ ok: true, espn_events: events.length, updated, results }),
