@@ -653,8 +653,8 @@ async function handlePin() {
       if (error) showPinError('PIN incorrecto. Intenta de nuevo.');
       return;
     }
-    const res = await fetch('/.netlify/functions/create-user', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    const res = await fetch(`${SB_URL}/functions/v1/create-user`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
       body: JSON.stringify({ profileId: selectedProfile.id, pin })
     });
     const created = await res.json();
@@ -1442,7 +1442,7 @@ async function handleToggleFlags(key) {
 async function handleESPNUpdate() {
   $('adm-msg-espn').textContent = '⏳ Consultando ESPN...'; $('adm-btn-espn').disabled = true;
   try {
-    const res = await fetch('/.netlify/functions/update-live');
+    const res = await fetch(`${SB_URL}/functions/v1/update-live`, { headers: { 'Authorization': `Bearer ${SB_KEY}` } });
     const data = await res.json();
     if (data.ok) {
       $('adm-msg-espn').textContent = `✓ ${data.updated} partidos actualizados (${data.espn_events} eventos ESPN)`;
