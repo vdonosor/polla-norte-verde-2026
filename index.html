@@ -577,7 +577,7 @@ const fmtDate = iso => {
   if (!iso) return '';
   const d = new Date(iso);
   return d.toLocaleDateString('es-CL', { weekday:'short', day:'2-digit', month:'short' }) +
-         ' ' + d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
+         ' ' + d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12: false });
 };
 const initials = name => name ? name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : '?';
 const CHIP_COLORS = ['#0d5c2f','#1e6b3a','#16803d','#166534','#15803d','#065f46','#0f766e','#0e7490','#1d4ed8','#4338ca','#7c3aed','#9333ea','#c026d3','#db2777','#e11d48','#dc2626'];
