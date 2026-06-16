@@ -1077,9 +1077,10 @@ function renderTabla() {
 
   const rows = displayLB.map(p => {
     const pos3 = displayPosMap[p.id], prz = prizes[pos3] || null;
-    const liveTag = hasLive && p.live_bonus > 0
-      ? `<span style="font-size:.58rem;background:#fef9c3;color:#854d0e;padding:1px 5px;border-radius:5px;font-weight:700;margin-left:2px">+${p.live_bonus}</span>`
-      : '';
+    const liveTag = !hasLive ? ''
+      : p.live_bonus > 0
+        ? `<span style="font-size:.58rem;background:#fef9c3;color:#854d0e;padding:1px 5px;border-radius:5px;font-weight:700;margin-left:2px">+${p.live_bonus}</span>`
+        : `<span style="display:inline-block;width:12px;height:3px;background:var(--text-3);border-radius:2px;vertical-align:middle;margin-left:4px"></span>`;
     return `<tr class="${p.id === me?.id ? 'me' : ''}" style="cursor:pointer" data-pid="${p.id}">
       <td class="lb-pos">${pos3}°</td>
       <td><div class="lb-name">${avatarHTML(p.avatar_url, p.name, 22)}
@@ -1095,9 +1096,9 @@ function renderTabla() {
 
   container.innerHTML = `
     <div class="view-header"><div class="view-header-label">Clasificación</div><div class="view-header-title">TABLA GENERAL</div></div>
-    ${hasLive ? `<div class="sec-divider" style="margin-bottom:12px"><div class="live-dot"></div><span class="sec-divider-label sec-live">En vivo</span><div class="sec-divider-line"></div></div>` : ''}
     ${prizeBar}
     <div class="podium">${podiumHTML}</div>
+    ${hasLive ? `<div class="sec-divider" style="margin:0 0 8px"><div class="live-dot"></div><span class="sec-divider-label sec-live">En vivo</span><div class="sec-divider-line"></div></div>` : ''}
     <div class="lb-wrap"><table class="leaderboard-table">
       <thead><tr><th>#</th><th>Jugador</th><th>GRU</th><th>ELI</th><th>EXT</th><th style="color:var(--accent)">EXA</th><th>TOTAL</th></tr></thead>
       <tbody>${rows}</tbody>
