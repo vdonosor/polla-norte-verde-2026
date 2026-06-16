@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Polla Norte Verde 2026</title>
+  <title>Polla Mundialista 2026 Norte Verde</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -360,7 +360,7 @@
   <div class="login-logo">
     <div class="login-logo-sup">Polla Mundialista 2026</div>
     <h1>NORTE VERDE</h1>
-    <p>Club Deportivo Norte Verde</p>
+    <p>Polla Mundialista 2026 Norte Verde</p>
   </div>
   <div class="login-subtitle">Selecciona tu perfil</div>
   <div class="profile-grid" id="profile-grid">
@@ -1065,7 +1065,8 @@ function renderResultados() {
 
   const live = matches.filter(m => m.status === 'EN_JUEGO');
   const done = matches.filter(m => m.status === 'FINALIZADO');
-  const upcoming = matches.filter(m => m.status !== 'EN_JUEGO' && m.status !== 'FINALIZADO');
+  const upcoming = matches.filter(m => m.status !== 'EN_JUEGO' && m.status !== 'FINALIZADO')
+    .sort((a, b) => new Date(a.kickoff_at || 0) - new Date(b.kickoff_at || 0));
 
   const makeCard = (m, inlinePreds) => {
     const isLive = m.status === 'EN_JUEGO', isDone = m.status === 'FINALIZADO';
