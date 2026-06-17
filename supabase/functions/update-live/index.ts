@@ -157,15 +157,8 @@ Deno.serve(async (req) => {
       method: 'POST', headers: sbHeaders, body: JSON.stringify({}),
     });
 
-    const espnTeams = events.map((e: any) => {
-      const comp = e.competitions?.[0];
-      const home = comp?.competitors?.find((c: any) => c.homeAway === 'home');
-      const away = comp?.competitors?.find((c: any) => c.homeAway === 'away');
-      return { home: home?.team?.displayName, away: away?.team?.displayName, status: e.status?.type?.name };
-    });
-
     return new Response(
-      JSON.stringify({ ok: true, espn_events: events.length, updated, results, espnTeams }),
+      JSON.stringify({ ok: true, espn_events: events.length, updated, results }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
