@@ -1353,7 +1353,8 @@ function renderResto() {
     });
   });
 
-  const leaderNames = new Set(leaders.map(l => l.name));
+  const maxGoals = topScorers[0]?.goals || 0;
+  const leaderNames = maxGoals > 0 ? new Set(topScorers.filter(p => p.goals === maxGoals).map(p => p.player_name)) : new Set();
   const sortDesc = obj => Object.entries(obj).sort((a,b) => b[1].length - a[1].length);
   const pickRow = (name, pickers, isLeader = false) =>
     `<div class="pick-row">
