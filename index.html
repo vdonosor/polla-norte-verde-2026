@@ -262,8 +262,15 @@
     .pick-chip { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 0.58rem; font-weight: 800; color: #fff; overflow: hidden; flex-shrink: 0; cursor: default; }
     .pick-chip img { width: 100%; height: 100%; object-fit: cover; }
     .goleador-card { background: var(--surface); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-    .goleador-label { font-size: 0.62rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px; display: block; }
+    .goleador-label { font-size: 0.62rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; display: block; }
     .goleador-leaders { font-size: 0.88rem; color: var(--text); margin-bottom: 3px; }
+    .scorer-rank-row { display: flex; align-items: baseline; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .scorer-rank-row:last-child { border-bottom: none; }
+    .scorer-medal { font-size: 0.75rem; min-width: 22px; color: var(--text-2); }
+    .scorer-names { flex: 1; color: var(--text); line-height: 1.5; }
+    .scorer-goals { font-weight: 700; color: var(--accent); white-space: nowrap; font-size: 0.78rem; }
+    .scorer-expand-btn { color: var(--accent); cursor: pointer; font-size: 0.75rem; font-weight: 600; text-decoration: underline; }
+    .scorer-extra { font-size: 0.73rem; color: var(--text-2); margin-top: 3px; }
     .goleador-runners { font-size: 0.7rem; color: var(--text-3); }
 
     /* ── PLANTELES ──────────────────────────────────────────── */
@@ -561,7 +568,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 
 // ── STATE ─────────────────────────────────────────────────────
 let me = null, allMatches = [], myPreds = {}, myBonus = {};
-let phaseSubmitted = new Set(), leaderboard = [], allPlayers = [];
+let phaseSubmitted = new Set(), leaderboard = [], allPlayers = [], topScorers = [];
 let config = {}, rankSnaps = {}, allBonusPicks = [];
 let selectedMatchPreds = [], matchPredMatchId = null;
 let currentView = 'pronosticos', currentPhase = 'Grupos';
@@ -681,7 +688,7 @@ async function initApp() {
 }
 
 async function loadAllData() {
-  const [matchR, predR, subR, cfgR, lbR, playerR, snapR, bonusR, bonusAllR] = await Promise.all([
+  const [matchR, predR, subR, cfgR, lbR, playerR, snapR, bonusR, bonusAllR, scorerR] = await Promise.all([
     sb.from('matches').select('*').order('match_number'),
     sb.from('predictions').select('*').eq('participant_id', me.id),
     sb.from('phase_submissions').select('phase').eq('participant_id', me.id),
@@ -691,6 +698,7 @@ async function loadAllData() {
     sb.rpc('get_rank_snap'),
     sb.from('bonus_predictions').select('*').eq('participant_id', me.id).maybeSingle(),
     sb.rpc('get_all_bonus_picks'),
+    sb.rpc('get_top_scorers'),
   ]);
   allMatches  = matchR.data || [];
   myPreds     = {}; (predR.data || []).forEach(p => { myPreds[p.match_id] = p; });
@@ -701,6 +709,7 @@ async function loadAllData() {
   rankSnaps   = snapR.data || {};
   myBonus     = bonusR.data || {};
   allBonusPicks = bonusAllR.data || [];
+  topScorers  = scorerR.data || [];
   pendingPreds = {}; pendingBonus = {};
 
   // Cargar predicciones de partidos EN VIVO para tabla en vivo
@@ -1267,20 +1276,44 @@ function renderLlave() {
 }
 
 // ── EL RESTO ──────────────────────────────────────────────────
+function toggleScorerExpand(rank) {
+  const el = document.getElementById(`scorer-extra-${rank}`);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
 function renderResto() {
   const container = $('view-resto');
 
-  // Goleador en curso
-  const topPlayers = allPlayers.filter(p => p.goals > 0).sort((a,b) => b.goals - a.goals);
-  const maxGoals = topPlayers[0]?.goals || 0;
-  const leaders  = topPlayers.filter(p => p.goals === maxGoals);
-  const runners  = topPlayers.filter(p => p.goals < maxGoals && p.goals > 0).slice(0, 6);
-  const goleadorHTML = maxGoals > 0 ? `
-    <div class="goleador-card">
-      <span class="goleador-label">🥇 Goleador en curso</span>
-      <div class="goleador-leaders">${leaders.map(p => `⚽ <b>${p.name}</b> ${p.goals}`).join('  ·  ')}</div>
-      ${runners.length ? `<div class="goleador-runners">Persiguen: ${runners.map(p => `${p.name} (${p.goals})`).join(' · ')}</div>` : ''}
-    </div>` : '';
+  // Ranking de goleadores desde get_top_scorers()
+  let goleadorHTML = '';
+  if (topScorers.length > 0) {
+    // Asignar rank con empates (DENSE_RANK)
+    let rank = 1;
+    const ranked = topScorers.map((p, i) => {
+      if (i > 0 && p.goals < topScorers[i-1].goals) rank = i + 1;
+      return { ...p, rank };
+    });
+    const byRank = {};
+    ranked.forEach(p => { if (!byRank[p.rank]) byRank[p.rank] = []; byRank[p.rank].push(p); });
+    const medals = ['🥇','🥈','🥉','4°','5°'];
+    const rows = Object.keys(byRank).map(Number).filter(r => r <= 5).sort((a,b)=>a-b).map(r => {
+      const ps = byRank[r];
+      const g = ps[0].goals;
+      const med = medals[r-1] || `${r}°`;
+      let nameHTML;
+      if (ps.length <= 2) {
+        nameHTML = ps.map(p => `${p.team_flag} <b>${p.player_name}</b>`).join('  ·  ');
+      } else {
+        const shown = ps.slice(0, 2).map(p => `${p.team_flag} <b>${p.player_name}</b>`).join(', ');
+        const extra = ps.slice(2);
+        nameHTML = `${shown}, <span class="scorer-expand-btn" onclick="toggleScorerExpand(${r})">+${extra.length} jugadores</span>`
+          + `<div class="scorer-extra" id="scorer-extra-${r}" style="display:none">${extra.map(p=>`${p.team_flag} ${p.player_name}`).join(', ')}</div>`;
+      }
+      return `<div class="scorer-rank-row"><span class="scorer-medal">${med}</span><span class="scorer-names">${nameHTML}</span><span class="scorer-goals">${g} ${g===1?'gol':'goles'}</span></div>`;
+    }).join('');
+    goleadorHTML = `<div class="goleador-card"><span class="goleador-label">⚽ Goleadores del torneo</span>${rows}</div>`;
+  }
 
   // Selector de partido para ver pronósticos
   const playedMatches = allMatches.filter(m => m.status === 'FINALIZADO' || m.status === 'EN_JUEGO');
