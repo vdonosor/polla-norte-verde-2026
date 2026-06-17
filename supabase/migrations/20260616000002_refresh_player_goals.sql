@@ -4,6 +4,8 @@
 
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
+GRANT EXECUTE ON FUNCTION refresh_player_goals() TO authenticated;
+
 CREATE OR REPLACE FUNCTION refresh_player_goals()
 RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN

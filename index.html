@@ -1421,7 +1421,7 @@ async function handleSetResult() {
   const { data, error } = await sb.rpc('set_result', { p_match_id: match.id, p_home: home, p_away: away, p_home_scorers: scH, p_away_scorers: scA });
   if (error) { $('adm-msg-result').textContent = 'Error: ' + error.message; return; }
   $('adm-msg-result').textContent = data === 'OK' ? '✓ Guardado' : data;
-  if (data === 'OK') { await loadAllData(); setupLiveRefresh(); renderView(currentView); }
+  if (data === 'OK') { await sb.rpc('refresh_player_goals').catch(()=>{}); await loadAllData(); setupLiveRefresh(); renderView(currentView); }
 }
 async function handleEnablePhase() {
   const phase = $('adm-phase').value; $('adm-msg-phase').textContent = 'Habilitando...';

@@ -64,8 +64,9 @@ Deno.serve(async (req) => {
     );
     const supaMatches = await matchRes.json();
 
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const espnRes = await fetch(
-      'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard',
+      `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${today}`,
       { headers: { 'Accept': 'application/json' } }
     );
     if (!espnRes.ok) {
@@ -156,8 +157,15 @@ Deno.serve(async (req) => {
       method: 'POST', headers: sbHeaders, body: JSON.stringify({}),
     });
 
+    const espnTeams = events.map((e: any) => {
+      const comp = e.competitions?.[0];
+      const home = comp?.competitors?.find((c: any) => c.homeAway === 'home');
+      const away = comp?.competitors?.find((c: any) => c.homeAway === 'away');
+      return { home: home?.team?.displayName, away: away?.team?.displayName, status: e.status?.type?.name };
+    });
+
     return new Response(
-      JSON.stringify({ ok: true, espn_events: events.length, updated, results }),
+      JSON.stringify({ ok: true, espn_events: events.length, updated, results, espnTeams }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
