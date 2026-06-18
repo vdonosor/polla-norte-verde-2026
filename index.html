@@ -577,6 +577,7 @@ let selectedProfile = null, pinDigits = [];
 let pendingPreds = {}, pendingBonus = {};
 let liveInterval = null;
 let expandedMatchId = null;
+let sectionCollapsed = { jugados: true, proximos: false };
 let livePredictions = {}; // matchId → preds array (cargado para partidos EN_JUEGO)
 
 // ── HELPERS ───────────────────────────────────────────────────
@@ -660,14 +661,15 @@ async function handlePin() {
       if (error) showPinError('PIN incorrecto. Intenta de nuevo.');
       return;
     }
-    const res = await fetch(`${SB_URL}/functions/v1/create-user`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
-      body: JSON.stringify({ profileId: selectedProfile.id, pin })
+    const { error: signUpErr } = await sb.auth.signUp({
+      email, password,
+      options: { data: { profile_id: selectedProfile.id } }
     });
-    const created = await res.json();
-    if (created?.error) { showPinError('Error: ' + created.error); return; }
+    if (signUpErr && !/already registered/i.test(signUpErr.message)) {
+      showPinError('Error: ' + signUpErr.message); return;
+    }
     const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
-    if (e2) { showPinError(created?.existing ? 'PIN incorrecto.' : 'Error: ' + e2.message); return; }
+    if (e2) { showPinError('PIN incorrecto.'); return; }
   } finally { $('pin-keypad').style.opacity = '1'; }
 }
 function showPinError(msg) { $('pin-error').textContent = msg; $('pin-keypad').style.opacity = '1'; pinDigits = []; updatePinDots(); }
@@ -1143,7 +1145,7 @@ function renderResultados() {
   const makeCard = (m, inlinePreds) => {
     const isLive = m.status === 'EN_JUEGO', isDone = m.status === 'FINALIZADO';
     const isExpanded = expandedMatchId === m.id;
-    const canTap = isDone || isLive;
+    const canTap = true;
     const pred = myPreds[m.id];
     const scoreEl = (isDone || isLive)
       ? `<div class="score-pill${isLive?' live-p':''}">${m.home_goals}—${m.away_goals}</div>`
@@ -1222,12 +1224,29 @@ function renderResultados() {
     <p style="font-size:.72rem;color:var(--text-3);margin-bottom:10px">Toca un partido para ver los pronósticos de cada uno.</p>
     <div class="group-tabs">${tabsHTML}</div>`;
   if (live.length) { html += `<div class="sec-divider"><div class="live-dot"></div><span class="sec-divider-label sec-live">En vivo</span><div class="sec-divider-line"></div></div>`; html += live.map(m => makeCard(m, inlinePredsMap[m.id])).join(''); }
-  if (done.length) { html += `<div class="sec-divider"><div class="sec-divider-line"></div><span class="sec-divider-label sec-done">Jugados</span><div class="sec-divider-line"></div></div>`; html += done.map(m => makeCard(m, inlinePredsMap[m.id])).join(''); }
-  if (upcoming.length) { html += `<div class="sec-divider"><div class="sec-divider-line"></div><span class="sec-divider-label sec-next">Próximos</span><div class="sec-divider-line"></div></div>`; html += upcoming.map(m => makeCard(m, null)).join(''); }
+  if (done.length) {
+    const col = sectionCollapsed.jugados;
+    html += `<div class="sec-divider sec-toggle" data-section="jugados" style="cursor:pointer">
+      <div class="sec-divider-line"></div>
+      <span class="sec-divider-label sec-done">Jugados (${done.length}) ${col ? '▸' : '▾'}</span>
+      <div class="sec-divider-line"></div>
+    </div>`;
+    if (!col) html += done.map(m => makeCard(m, inlinePredsMap[m.id])).join('');
+  }
+  if (upcoming.length) {
+    const col = sectionCollapsed.proximos;
+    html += `<div class="sec-divider sec-toggle" data-section="proximos" style="cursor:pointer">
+      <div class="sec-divider-line"></div>
+      <span class="sec-divider-label sec-next">Próximos (${upcoming.length}) ${col ? '▸' : '▾'}</span>
+      <div class="sec-divider-line"></div>
+    </div>`;
+    if (!col) html += upcoming.map(m => makeCard(m, inlinePredsMap[m.id])).join('');
+  }
   if (!live.length && !done.length && !upcoming.length) html += '<div class="empty">No hay partidos aquí.</div>';
 
   container.innerHTML = html;
   container.querySelectorAll('.group-tab').forEach(t => t.addEventListener('click', () => { currentGroup = t.dataset.g; renderResultados(); }));
+  container.querySelectorAll('.sec-toggle').forEach(el => el.addEventListener('click', () => { const s = el.dataset.section; sectionCollapsed[s] = !sectionCollapsed[s]; renderResultados(); }));
 
   // Tap to expand predictions
   container.querySelectorAll('.result-card[data-can-tap="true"]').forEach(card => {
