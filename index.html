@@ -158,6 +158,7 @@
     .btn-draft  { flex: 1; background: var(--surface); color: var(--text); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; font-size: 0.88rem; font-weight: 600; }
     .btn-submit { flex: 2; background: var(--accent); color: #fff; border-radius: 12px; padding: 12px; font-size: 0.88rem; font-weight: 700; }
     .btn-submit:disabled { background: var(--border); color: var(--text-3); cursor: not-allowed; }
+    .btn-match-submit { background: var(--accent); color: #fff; border-radius: 8px; padding: 5px 12px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; }
 
     /* ── TABLA ──────────────────────────────────────────────── */
     .prize-bar { background: var(--surface); border-radius: 10px; padding: 10px 14px; font-size: 0.74rem; color: var(--text-2); text-align: center; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -807,10 +808,11 @@ function renderPronosticos() {
   }
 
   const ticketsHTML = matchesInPhase.map(m => matchTicket(m, isSubmitted)).join('');
+  const isGruposPhase = currentPhase === 'Grupos';
   const actionsHTML = !isSubmitted ? `
     <div class="actions-bar">
       <button class="btn-draft" id="btn-draft">Guardar borrador</button>
-      ${submissionsOpen || (me && me.can_submit) ? `<button class="btn-submit" id="btn-submit">Enviar definitivo ✓</button>` : ''}
+      ${isGruposPhase && (submissionsOpen || (me && me.can_submit)) ? `<button class="btn-submit" id="btn-submit">Enviar definitivo ✓</button>` : ''}
     </div>` : '';
 
   container.innerHTML = `
@@ -851,25 +853,35 @@ function renderPronosticos() {
     $('btn-submit')?.addEventListener('click', () => {
       if (confirm('¿Enviar predicciones definitivas? No se pueden cambiar después.')) savePreds(true);
     });
+    container.querySelectorAll('.btn-match-submit').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const mid = parseInt(btn.dataset.mid);
+        if (confirm('¿Enviar pronóstico de este partido? No se podrá cambiar después.')) saveMatchPred(mid);
+      }));
   }
 }
 
-function matchTicket(m, isSubmitted) {
+function matchTicket(m, isPhaseSubmitted) {
   const now = new Date();
   const deadlinePassed = m.deadline_at && new Date(m.deadline_at) < now;
-  const locked = isSubmitted || deadlinePassed;
+  const teamsUndefined = !m.home_team_id || !m.away_team_id;
+  const predSubmitted = myPreds[m.id]?.submitted === true;
+  const locked = isPhaseSubmitted || predSubmitted || deadlinePassed;
   const pred = pendingPreds[m.id] || (myPreds[m.id] ? { home: myPreds[m.id].home_goals, away: myPreds[m.id].away_goals } : null);
   const matchDone = m.status === 'FINALIZADO', matchLive = m.status === 'EN_JUEGO';
   const pts = myPreds[m.id]?.points, isExact = myPreds[m.id]?.is_exact;
+  const isGrupos = m.phase === 'Grupos';
 
   let statusTag = matchLive ? `<span class="ticket-status status-live">🔴 ${m.live_clock ? m.live_clock+"'" : 'En vivo'}</span>`
     : matchDone ? `<span class="ticket-status status-done">✓ Final</span>`
+    : predSubmitted ? `<span class="ticket-status status-upcoming">🔒 Enviado</span>`
     : locked ? `<span class="ticket-status status-upcoming">🔒 Cerrado</span>`
+    : teamsUndefined ? `<span class="ticket-status status-upcoming">⏳ Por definir</span>`
     : `<span class="ticket-status status-upcoming">${fmtDate(m.kickoff_at)}</span>`;
 
   const hs = matchDone || matchLive ? m.home_goals : (pred?.home ?? 0);
   const as_ = matchDone || matchLive ? m.away_goals : (pred?.away ?? 0);
-  const ro = locked || matchDone || matchLive ? 'readonly' : '';
+  const ro = locked || matchDone || matchLive || teamsUndefined ? 'readonly' : '';
 
   const homeIn = ro
     ? `<input type="number" class="score-val readonly" value="${hs}" readonly>`
@@ -885,10 +897,12 @@ function matchTicket(m, isSubmitted) {
     else ptsTag = `<span class="ticket-pts pts-fail">✗ Falló</span>`;
   } else if (matchDone && !pred) ptsTag = `<span class="ticket-pts pts-none">Sin pronóstico</span>`;
 
+  const showMatchSubmit = !isGrupos && !isPhaseSubmitted && !predSubmitted && !deadlinePassed && !matchDone && !matchLive && !teamsUndefined;
+
   return `
     <div class="match-ticket">
       <div class="ticket-header">
-        <span class="ticket-header-left">Grupo ${m.group_name || '—'} · P${m.match_number}</span>
+        <span class="ticket-header-left">${m.group_name ? 'Grupo '+m.group_name+' · ' : ''}P${m.match_number}</span>
         ${statusTag}
       </div>
       <div class="ticket-body">
@@ -899,6 +913,7 @@ function matchTicket(m, isSubmitted) {
       <div class="ticket-footer">
         <span class="ticket-stadium">📍 ${(m.stadium||'').split(',')[0]||'—'}</span>
         ${ptsTag}
+        ${showMatchSubmit ? `<button class="btn-match-submit" data-mid="${m.id}">Enviar ✓</button>` : ''}
       </div>
     </div>`;
 }
@@ -922,6 +937,23 @@ async function savePreds(isFinal) {
   myBonus = bonR.data || {}; pendingPreds = {};
   renderPronosticos();
   showToast(isFinal ? '¡Predicciones enviadas!' : 'Borrador guardado ✓');
+}
+
+async function saveMatchPred(matchId) {
+  const pred = pendingPreds[matchId] || (myPreds[matchId] ? { home: myPreds[matchId].home_goals, away: myPreds[matchId].away_goals } : null);
+  if (pred === null) { showToast('Ingresa un pronóstico primero.', 'error'); return; }
+  const { data, error } = await sb.rpc('save_predictions', {
+    p_phase: currentPhase,
+    p_items: [{ match_id: matchId, home_goals: pred.home, away_goals: pred.away }],
+    p_final: true,
+  });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  if (data === 'FASE_BLOQUEADA') { showToast('Esta fase ya fue enviada.', 'error'); return; }
+  const predR = await sb.from('predictions').select('*').eq('participant_id', me.id);
+  myPreds = {}; (predR.data||[]).forEach(p => { myPreds[p.match_id] = p; });
+  delete pendingPreds[matchId];
+  renderPronosticos();
+  showToast('¡Pronóstico enviado! 🔒');
 }
 
 // ── PROFILE MODAL ────────────────────────────────────────────
