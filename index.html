@@ -1303,27 +1303,75 @@ function renderLlave() {
   ];
   const roundTabs = ROUNDS.map(r => `<button class="round-tab ${r.key===currentRound?'active':''}" data-r="${r.key}">${r.label}</button>`).join('');
   const roundMatches = allMatches.filter(m => m.phase === currentRound && m.enabled);
+
+  const inlinePredsMap = {};
+  if (expandedMatchId !== null && selectedMatchPreds.length && matchPredMatchId === expandedMatchId) {
+    inlinePredsMap[expandedMatchId] = selectedMatchPreds;
+  }
+
   let bodyHTML = !roundMatches.length
     ? `<div class="locked-view"><div class="locked-view-icon">🔒</div><div class="locked-view-text">Esta ronda aún no está disponible.<br>Se habilitará cuando avance el torneo.</div></div>`
     : roundMatches.map(m => {
         const isDone = m.status==='FINALIZADO', isLive = m.status==='EN_JUEGO';
+        const isExpanded = expandedMatchId === m.id;
+        const inlinePreds = inlinePredsMap[m.id];
         const scoreEl = (isDone||isLive)
           ? `<div class="bracket-score${isLive?'" style="background:var(--live)':''}">${m.home_goals}—${m.away_goals}</div>`
           : `<div class="bracket-vs">${fmtDate(m.kickoff_at)}</div>`;
-        return `<div class="bracket-match">
+        let predsHTML = '';
+        if (isExpanded && inlinePreds) {
+          predsHTML = `<div class="inline-preds">
+            <div class="inline-preds-header"><span>Pronósticos</span><span style="color:var(--text-3);font-size:.6rem">${inlinePreds.length} participantes</span></div>
+            ${inlinePreds.map(p => {
+              let badge = '';
+              if (m.status === 'EN_JUEGO') {
+                const r = calcLiveResult(p.home_goals, p.away_goals, m.home_goals, m.away_goals);
+                if (r.type === 'EXACTO') badge = `<span class="ticket-pts pts-exact">✓ Exacto +${r.pts}</span>`;
+                else if (r.type === 'GANADOR') badge = `<span class="ticket-pts pts-winner">↗ +${r.pts}</span>`;
+                else badge = `<span class="ticket-pts pts-fail">✗ 0</span>`;
+              } else {
+                if (p.is_exact) badge = `<span class="ticket-pts pts-exact">✓ Exacto +${p.points}</span>`;
+                else if (p.points > 0) badge = `<span class="ticket-pts pts-winner">↗ +${p.points}</span>`;
+                else if (p.points !== null && p.points !== undefined) badge = `<span class="ticket-pts pts-fail">✗ 0</span>`;
+              }
+              return `<div class="inline-pred-row" data-pid="${p.profile_id}">
+                <span class="inline-pred-name">${p.profile_name}</span>
+                <span class="inline-pred-score">${p.home_goals}–${p.away_goals}</span>
+                ${badge}
+              </div>`;
+            }).join('')}
+          </div>`;
+        } else if (isExpanded) {
+          predsHTML = `<div class="inline-preds"><div class="inline-preds-header"><span>Pronósticos</span></div><div class="empty" style="padding:14px">Cargando...</div></div>`;
+        }
+        return `<div class="bracket-match tappable${isExpanded?' expanded':''}" data-mid="${m.id}">
           <div class="bracket-header">P${m.match_number}${m.stadium?' · '+m.stadium.split(',')[0]:''}${isLive?' 🔴':''}</div>
           <div class="bracket-body">
             <div class="bracket-team"><span class="flag">${flagFor(m.home_team)}</span><span>${m.home_team}</span></div>
             ${scoreEl}
             <div class="bracket-team"><span class="flag">${flagFor(m.away_team)}</span><span>${m.away_team}</span></div>
           </div>
+          ${predsHTML}
         </div>`;
       }).join('');
 
   container.innerHTML = `
     <div class="view-header"><div class="view-header-label">Eliminatorias</div><div class="view-header-title">LA LLAVE</div></div>
+    <p style="font-size:.72rem;color:var(--text-3);margin-bottom:10px">Toca un partido para ver los pronósticos de cada uno.</p>
     <div class="round-tabs">${roundTabs}</div>${bodyHTML}`;
   container.querySelectorAll('.round-tab').forEach(t => t.addEventListener('click', () => { currentRound = t.dataset.r; renderLlave(); }));
+
+  container.querySelectorAll('.bracket-match[data-mid]').forEach(card => {
+    card.addEventListener('click', async e => {
+      if (e.target.closest('[data-pid]')) { openProfileModal(parseInt(e.target.closest('[data-pid]').dataset.pid)); return; }
+      const mid = parseInt(card.dataset.mid);
+      if (expandedMatchId === mid) { expandedMatchId = null; matchPredMatchId = null; selectedMatchPreds = []; renderLlave(); return; }
+      expandedMatchId = mid;
+      renderLlave();
+      await loadMatchPreds(mid);
+      renderLlave();
+    });
+  });
 }
 
 // ── EL RESTO ──────────────────────────────────────────────────
